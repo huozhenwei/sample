@@ -16,14 +16,31 @@ import {
 
 export default class ViewUtil{
 
-    //返回按钮
+    /**
+     * @param callBack 返回事件由用户处理
+     */
     static getLeftButton(callBack){
-        {/* 返回事件由用户处理 */}
+
         return <TouchableOpacity
             style={{padding: 8}}
             onPress={callBack}>
             <Image style={styles.returnImage}
                    source={require('../../res/images/ic_arrow_back_white_36pt.png')} />
+        </TouchableOpacity>
+    }
+
+    /**
+     *
+     * @param title
+     * @param callBack 返回事件由用户处理
+     */
+    static getRightButton(title, callBack) {
+        return <TouchableOpacity
+            style={{alignItems: 'center',}}
+            onPress={callBack}>
+            <View style={{marginRight: 10}}>
+                <Text style={{fontSize: 20, color: '#FFFFFF',}}>{title}</Text>
+            </View>
         </TouchableOpacity>
     }
 }

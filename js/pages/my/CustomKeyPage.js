@@ -19,6 +19,8 @@ import LanguageDao,{FLAG_LANGUAGE} from '../../expand/dao/LanguageDao';
 export default class CustomKeyPage extends Component{
     constructor(props){
         super(props);
+        //自定义标签 和 标签移除两功能, 页面复用较多,用isRemoveKey标识进行区分
+        this.isRemoveKey = this.props.isRemoveKey ? true: false;
         //初始化LanguageDao
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         //用于记录用户的修改
@@ -44,18 +46,6 @@ export default class CustomKeyPage extends Component{
             .catch(error=>{
                 console.log(error);
             })
-    }
-
-    //用户点击返回按钮,校验保存
-    onSave(){
-        //如果this.changeValues不为空,需要保存数据
-        if(this.changeValues.length === 0){
-            this.props.navigator.pop(); //返回上一页
-            return;
-        }
-        //this.changeValues仅用于判断用户是否操作, 数据的变化实时同步到dataArray, 保存dataArray即可
-        this.languageDao.save(this.state.dataArray);
-        this.props.navigator.pop();
     }
 
     //渲染自定义标签
@@ -92,12 +82,14 @@ export default class CustomKeyPage extends Component{
     //渲染checkbox组件(左侧文字,右侧选择/未选中框)
     renderCheckBox(data){
         let leftText = data.name;
+        //此页面如果是用于删除标签, 则默认复选框不选中
+        let isChecked = this.isRemoveKey ? false : data.checked;
         //不设置样式,文字显示不出来
         return (
             <CheckBox
                 style={{flex:1, padding:10}}
                 onClick={()=>this.onClick(data)}
-                isChecked={data.checked}
+                isChecked={isChecked}
                 leftText={leftText}
                 checkedImage={<Image
                     style={{tintColor:'#2196F3'}}
@@ -111,12 +103,15 @@ export default class CustomKeyPage extends Component{
 
     //点击复选框
     onClick(data){
-        //取反
-        data.checked = !data.checked;
+        //不是标签移除, 改变数据状态
+        if(!this.isRemoveKey){
+            data.checked = !data.checked;
+        }
         //记录用户的修改
         ArrayUtils.updateArray(this.changeValues, data);
     }
 
+    //用户点击返回按钮,校验保存
     onBack(){
         if(this.changeValues.length === 0)
         {
@@ -136,25 +131,40 @@ export default class CustomKeyPage extends Component{
         )
     }
 
+    onSave(){
+        //如果this.changeValues不为空,需要保存数据
+        if(this.changeValues.length === 0){
+            this.props.navigator.pop(); //返回上一页
+            return;
+        }
+        //如果是删除标签功能, 要把发生变化的标签从数据库中移除,最后在保存
+        if(this.isRemoveKey){
+            for(let i =0,len=this.changeValues.length; i<len;i++){
+                ArrayUtils.remove(this.state.dataArray, this.changeValues[i]);
+            }
+        }
+        //this.changeValues仅用于判断用户是否操作, 数据的变化实时同步到dataArray, 保存dataArray即可
+        this.languageDao.save(this.state.dataArray);
+        this.props.navigator.pop();
+    }
+
     render(){
-        let rightButton = <TouchableOpacity
-            onPress={()=>this.onSave()}
-        >
-            <View style={{margin:10}}>
-                <Text style={styles.save}>保存</Text>
+        let title = this.isRemoveKey ? '标签移除':'自定义标签';
+        let rightButtonText = this.isRemoveKey ? '移除':'保存';
+        let navigationBar = <NavigationBar
+            title={title}
+            leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
+            style={{backgroundColor:'#2196F3'}}
+            rightButton={ViewUtil.getRightButton(rightButtonText,()=>this.onSave())}
+        />;
+        return (
+            <View style={styles.container}>
+                {navigationBar}
+                <ScrollView>
+                    {this.renderView()}
+                </ScrollView>
             </View>
-        </TouchableOpacity>;
-        return (<View style={styles.container}>
-            <NavigationBar
-                title='自定义标签'
-                style={{backgroundColor:'#2196F3'}}
-                leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
-                rightButton={rightButton}
-            />
-            <ScrollView>
-                {this.renderView()}
-            </ScrollView>
-        </View>)
+        )
     }
 }
 

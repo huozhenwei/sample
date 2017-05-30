@@ -37,6 +37,17 @@ export default class MyPage extends Component{
                         params:{...this.props}
                     })
                 }}>标签排序</Text>
+
+            <Text style={styles.tips}
+                  onPress={()=>{
+                    this.props.navigator.push({
+                        component:CustomKeyPage,
+                        params:{
+                            ...this.props,
+                            isRemoveKey:true, //用于标识进入标签删除功能
+                        }
+                    })
+                }}>标签移除</Text>
         </View>)
     }
 }
