@@ -9,7 +9,8 @@ import {
     View,
     TextInput,
     ListView,
-    RefreshControl
+    RefreshControl,
+    DeviceEventEmitter
 } from 'react-native';
 import ScrollableTabView,{ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import NavigationBar from '../common/NavigationBar';
@@ -101,23 +102,43 @@ class PopularTab extends Component{
         //调用数据模块, 获取用户输入关键字下的项目数据
         let url = URL + this.props.tabLabel + QUERY_STR;
         this.dataRepository
-            .fetchNetRepository(url)
+            .fetchRepository(url)
             .then(result=>{
+                let items = result && result.items ? result.items : result ? result : []; //最后判断result
                 //把数据赋给dataSource
                 this.setState({
-                    dataSource:this.state.dataSource.cloneWithRows(result.items),
+                    dataSource:this.state.dataSource.cloneWithRows(items),
                     isLoading:false, //数据返回后停止
-                })
+                });
+                if(result&&result.update_date&&!this.dataRepository.checkData(result.update_date)){
+                    DeviceEventEmitter.emit('showToast','数据过时');
+                    //数据过时,重新获取
+                    return this.dataRepository.fetchNetRepository(url);
+                }
+                else{
+                    DeviceEventEmitter.emit('showToast','显示缓存数据');
+                }
+            })
+            .then(items=>{
+                //接收网络请求数据
+                if(!items || items.length ===0)return;
+                //刷新数据
+                this.setState({
+                    dataSource:this.state.dataSource.cloneWithRows(items),
+                    isLoading:false, //数据返回后停止
+                });
+                DeviceEventEmitter.emit('showToast','显示网络数据');
             })
             .catch(err=>{
+                console.log(err);
                 this.setState({
-                    result:JSON.stringify(err)
-                })
+                    isLoading:false
+                });
             })
     }
 
     renderRow(data){
-        return <RepositoryCell data={data}/>
+        return <RepositoryCell key={data.id} data={data}/>
     }
 
     render(){
