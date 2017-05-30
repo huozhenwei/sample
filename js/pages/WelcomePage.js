@@ -41,7 +41,7 @@ export default class WelcomePage extends Component{
         return (<View style={styles.container}>
             <NavigationBar
                 title='欢迎'
-                style={{backgroundColor:'#6495ED'}}
+                style={{backgroundColor:'#2196F3'}}
             />
             <Text style={styles.tips}>欢迎</Text>
         </View>)
