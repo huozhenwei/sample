@@ -17,7 +17,7 @@ import NavigationBar from '../common/NavigationBar';
 import RepositoryCell from '../common/RepositoryCell';
 import DataRepository from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
-
+import RepositoryDetail from './RepositoryDetail';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 export default class PopularPage extends Component{
@@ -62,7 +62,7 @@ export default class PopularPage extends Component{
             {this.state.languages.map((result,i,arr)=>{
                 let lan = arr[i];
                 //必须是订阅了的标签
-                return lan.checked ? <PopularTab key={i} tabLabel={lan.name}/> :null;
+                return lan.checked ? <PopularTab key={i} tabLabel={lan.name} {...this.props}/> :null;
             })}
         </ScrollableTabView> : null;
 
@@ -137,8 +137,22 @@ class PopularTab extends Component{
             })
     }
 
+    //点击项目查看详情页面
+    onSelect(item){
+        this.props.navigator.push({
+            component:RepositoryDetail,
+            params:{
+                item:item,
+                ...this.props
+            }
+        });
+    }
+
     renderRow(data){
-        return <RepositoryCell key={data.id} data={data}/>
+        return <RepositoryCell
+            onSelect={()=>this.onSelect(data)}
+            key={data.id}
+            data={data}/>
     }
 
     render(){
