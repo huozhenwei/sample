@@ -24,27 +24,27 @@ export default class DataRepository{
         return new Promise((resolve,reject)=>{
             //获取本地数据
             this.fetchLocalRepository(url)
-                .then(result=>{
+                .then((result)=>{
                     if(result){
                         resolve(result);
                     }
                     else{
                         //本地没有数据,发起网络请求
                         this.fetchNetRepository(url)
-                            .then(data=>{
+                            .then((data)=>{
                                 resolve(data);
                             })
-                            .catch(e=>{
+                            .catch((e)=>{
                                 reject(e);
                             })
                     }
                 })
-                .catch(e=>{
+                .catch((e)=>{
                     this.fetchNetRepository(url)
-                        .then(data=>{
+                        .then((data)=>{
                             resolve(data);
                         })
-                        .catch(e=>{
+                        .catch((e)=>{
                             reject(e);
                         })
                 })
@@ -82,31 +82,11 @@ export default class DataRepository{
     fetchNetRepository(url){
         //需要向调用者返回Promise对象, 把服务器返回的信息告诉调用者
         return new Promise((resolve,reject)=> {
-            //发起Trending数据请求
-            if(this.flag === FLAG_STORAGE.flag_trending){
-                this.trending.fetchTrending(url)
-                    .catch(error=>{
-                        reject(error);
-                    })
-                    .then(result=>{
-                        if(!result){
-                            reject(new Error('responseData is null'));
-                            return;
-                        }
-                        //缓存到本地
-                        this.saveRepository(url,result);
-                        resolve(result);
-                    })
-            }
-            else{
+            if(this.flag === FLAG_STORAGE.flag_popular){
                 //向服务器发起请求
                 fetch(url)
-                    .then(response=>response.json())
-                    .catch(error=>{
-                        //请求失败,捕捉到信息告诉调用者
-                        reject(error);
-                    })
-                    .then(result=>{
+                    .then((response)=>response.json())
+                    .then((result)=>{
                         if(!result || !result.items){
                             reject(new Error('responseData is null'));
                             return;
@@ -115,6 +95,24 @@ export default class DataRepository{
                         resolve(result.items);
                         //保存数据
                         this.saveRepository(url,result.items);
+                    })
+                    .catch((error)=>{
+                        //请求失败,捕捉到信息告诉调用者
+                        reject(error);
+                    })
+            }
+            else {
+                this.trending.fetchTrending(url)
+                    .then((result)=>{
+                        if(!result){
+                            reject(new Error('responseData is null'));
+                            return;
+                        }
+                        resolve(result);
+                        this.saveRepository(url,result);
+                    })
+                    .catch((error)=>{
+                        reject(error);
                     })
             }
         })
