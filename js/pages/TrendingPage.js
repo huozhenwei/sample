@@ -1,5 +1,5 @@
 /**
- * Created by huozhenwei on 2017/5/28.
+ * Created by huozhenwei on 2017/5/31.
  */
 import React,{Component} from 'react';
 
@@ -8,23 +8,25 @@ import {
     Text,
     View,
     TextInput,
+    Image,
     ListView,
     RefreshControl,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    TouchableOpacity
 } from 'react-native';
 import ScrollableTabView,{ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import NavigationBar from '../common/NavigationBar';
-import RepositoryCell from '../common/RepositoryCell';
+import TrendingCell from '../common/TrendingCell';
 import DataRepository,{FLAG_STORAGE} from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import RepositoryDetail from './RepositoryDetail';
-const URL = 'https://api.github.com/search/repositories?q=';
-const QUERY_STR = '&sort=stars';
-export default class PopularPage extends Component{
+
+const API_URL = 'https://github.com/trending/';
+export default class TrendingPage extends Component{
     constructor(props){
         super(props);
         //初始化LanguageDao
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_language);
         this.state = {
             languages:[], //语言标签
         }
@@ -62,13 +64,13 @@ export default class PopularPage extends Component{
             {this.state.languages.map((result,i,arr)=>{
                 let lan = arr[i];
                 //必须是订阅了的标签
-                return lan.checked ? <PopularTab key={i} tabLabel={lan.name} {...this.props}/> :null;
+                return lan.checked ? <TrendingTab key={i} tabLabel={lan.name} {...this.props}/> :null;
             })}
         </ScrollableTabView> : null;
 
         return (<View style={styles.container}>
             <NavigationBar
-                title='最热'
+                title='趋势'
                 statusBar={{backgroundColor:'#2196F3'}}
             />
             {content}
@@ -76,11 +78,11 @@ export default class PopularPage extends Component{
     }
 }
 
-class PopularTab extends Component{
+class TrendingTab extends Component{
     constructor(props){
         super(props);
         //传入参数,初始化数据处理模块
-        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
+        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
         this.state = {
             //为ListView 创建数据源, 规则是下一行数据不一样的时候,ListView渲染它
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
@@ -98,8 +100,7 @@ class PopularTab extends Component{
         this.setState({
             isLoading:true
         });
-        //调用数据模块, 获取用户输入关键字下的项目数据
-        let url = URL + this.props.tabLabel + QUERY_STR;
+        let url = this.getFetchUrl('',this.props.tabLabel);
         this.dataRepository
             .fetchRepository(url)
             .then(result=>{
@@ -107,15 +108,13 @@ class PopularTab extends Component{
                 //把数据赋给dataSource
                 this.setState({
                     dataSource:this.state.dataSource.cloneWithRows(items),
-                    isLoading:false //数据返回后停止
+                    isLoading:false
                 });
+                DeviceEventEmitter.emit('showToast', '显示缓存数据');
                 if(result && result.update_date && !this.dataRepository.checkData(result.update_date)){
                     //数据过时,重新获取
                     DeviceEventEmitter.emit('showToast','数据过时');
                     return this.dataRepository.fetchNetRepository(url);
-                }
-                else{
-                    DeviceEventEmitter.emit('showToast', '显示缓存数据');
                 }
             })
             .then(items=>{
@@ -136,6 +135,11 @@ class PopularTab extends Component{
             })
     }
 
+    getFetchUrl(timeSpan, category) {//objective-c?since=daily
+        // return API_URL + category + '?' + timeSpan.searchText;
+        return API_URL + category + '?' + 'since=daily';
+    }
+
     //点击项目查看详情页面
     onSelect(item){
         this.props.navigator.push({
@@ -148,7 +152,7 @@ class PopularTab extends Component{
     }
 
     renderRow(data){
-        return <RepositoryCell
+        return <TrendingCell
             onSelect={()=>this.onSelect(data)}
             key={data.id}
             data={data}/>
@@ -182,6 +186,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     tips: {
-       fontSize: 29
+        fontSize: 29
     },
 });
