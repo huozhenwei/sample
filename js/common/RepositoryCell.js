@@ -23,7 +23,7 @@ export default class RepositoryCell extends Component {
     }
     //当传入的参数发生变化时,更新视图
     componentWillReceiveProps(nextProps){
-        this.setFavouriteState(nextProps.projectModel.isFavourite)
+        this.setFavouriteState(nextProps.projectModel.isFavourite);
     }
     setFavouriteState(isFavourite){
         this.setState({
@@ -37,16 +37,15 @@ export default class RepositoryCell extends Component {
         //当前Cell组件通知PopularPage页面用户单击了图标,让PopularPage处理逻辑
         this.props.onFavourite(this.props.projectModel.item,!this.state.isFavourite);
     }
-    
+
     render() {
         let item = this.props.projectModel.item ? this.props.projectModel.item:null;
-        let favouriteButton = <TouchableOpacity
-            onPress={()=>this.onPressFavourite()}
-        >
+        let favouriteButton = this.props.projectModel.item ?
+        <TouchableOpacity onPress={()=>this.onPressFavourite()}>
             <Image
                 style={[{width: 22,height: 22},{tintColor:'#2196F3'}]}
                 source={this.state.favouriteIcon}/>
-        </TouchableOpacity>;
+        </TouchableOpacity>:null;
         return <TouchableOpacity
             onPress={this.props.onSelect}
             style={styles.container}>
