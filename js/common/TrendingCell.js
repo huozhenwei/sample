@@ -35,7 +35,7 @@ export default class TrendingCell extends Component {
                 <Text style={styles.description}>{data.meta}</Text>
                 <View style={styles.bot}>
                     <View style={styles.botLeft}>
-                        <Text style={styles.description}>Build by</Text>
+                        <Text style={styles.description}>Build by </Text>
                         {data.contributors.map((res,i,arr)=>{
                             return <Image
                                 key={i}
@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     avatarImage: {
         height: 22,
         width: 22,
+        marginRight:5
     },
     botCenter: {
         flexDirection: 'row',

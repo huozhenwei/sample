@@ -21,17 +21,17 @@ export default class CustomKeyPage extends Component{
         super(props);
         //自定义标签 和 标签移除两功能, 页面复用较多,用isRemoveKey标识进行区分
         this.isRemoveKey = this.props.isRemoveKey ? true: false;
-        //初始化LanguageDao
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         //用于记录用户的修改
         this.changeValues = [];
         this.state={
-            dataArray:[], //语言标签
+            dataArray:[] //语言标签
         }
     }
 
     //组件完成加载时候就调用
     componentDidMount(){
+        //初始化LanguageDao
+        this.languageDao = new LanguageDao(this.props.flag);
         this.loadData();
     }
 
@@ -150,6 +150,7 @@ export default class CustomKeyPage extends Component{
 
     render(){
         let title = this.isRemoveKey ? '标签移除':'自定义标签';
+        title = this.props.flag === FLAG_LANGUAGE.flag_language?'自定义语言':title;
         let rightButtonText = this.isRemoveKey ? '移除':'保存';
         let navigationBar = <NavigationBar
             title={title}
