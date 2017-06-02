@@ -49,9 +49,23 @@ export default class MyPage extends Component{
                 onPress={()=>{
                     this.props.navigator.push({
                         component:SortKeyPage,
-                        params:{...this.props}
+                        params:{
+                            ...this.props,
+                            flag:FLAG_LANGUAGE.flag_key
+                        }
                     })
                 }}>标签排序</Text>
+
+            <Text style={styles.tips}
+                onPress={()=>{
+                    this.props.navigator.push({
+                        component:SortKeyPage,
+                        params:{
+                            ...this.props,
+                            flag:FLAG_LANGUAGE.flag_language
+                        }
+                    })
+                }}>语言排序</Text>
 
             <Text style={styles.tips}
                   onPress={()=>{
@@ -60,6 +74,7 @@ export default class MyPage extends Component{
                         params:{
                             ...this.props,
                             isRemoveKey:true, //用于标识进入标签删除功能
+                            flag:FLAG_LANGUAGE.flag_key
                         }
                     })
                 }}>标签移除</Text>

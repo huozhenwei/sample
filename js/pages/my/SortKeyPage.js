@@ -25,11 +25,11 @@ export default class SortKeyPage extends Component {
         this.sortResultArray = []; //最终排序后的数组
         this.originalCheckedArray = []; //上一次标签排序的顺序
         this.state = {
-            checkedArray: [], //已经订阅的标签
+            checkedArray: [] //已经订阅的标签
         }
 
         //初始化LanguageDao
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.languageDao = new LanguageDao(this.props.flag);
     }
 
     //组件完成加载时候就调用
@@ -119,10 +119,10 @@ export default class SortKeyPage extends Component {
                 <Text style={styles.save}>保存</Text>
             </View>
         </TouchableOpacity>;
-
+        let title = this.props.flag === FLAG_LANGUAGE.flag_language?'语言排序':'标签排序';
         return (<View style={styles.container}>
             <NavigationBar
-                title='我的'
+                title={title}
                 style={{backgroundColor:'#2196F3'}}
                 leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
                 rightButton={rightButton}
