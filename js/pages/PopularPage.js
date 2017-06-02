@@ -18,15 +18,20 @@ import RepositoryCell from '../common/RepositoryCell';
 import DataRepository,{FLAG_STORAGE} from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import RepositoryDetail from './RepositoryDetail';
+import ProjectModel from '../model/ProjectModel';
+import FavouriteDao from '../expand/dao/FavouriteDao';
+import Utils from '../util/Utils';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
+//全局的,在不同页签下使用
+var favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_popular);
 export default class PopularPage extends Component{
     constructor(props){
         super(props);
         //初始化LanguageDao
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.state = {
-            languages:[], //语言标签
+            languages:[] //语言标签
         }
     }
 
@@ -84,7 +89,8 @@ class PopularTab extends Component{
         this.state = {
             //为ListView 创建数据源, 规则是下一行数据不一样的时候,ListView渲染它
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
-            isLoading: false //什么时候显示刷新视图
+            isLoading: false, //什么时候显示刷新视图
+            favouriteKeys:[]
         }
     }
 
@@ -93,9 +99,42 @@ class PopularTab extends Component{
         this.loadData();
     }
 
+    /**
+     * 更新Project Item 收藏的状态
+     */
+    flushFavouriteState(){
+        let projectModels = [];
+        let items = this.items;
+        for(var i=0,len=items.length;i<len;i++){
+            projectModels.push(new ProjectModel(items[i],Utils.checkFavourite(items[i],this.state.favouriteKeys)));
+        }
+        this.updateState({
+            isLoading:false,
+            dataSource:this.getDataSource(projectModels)
+        })
+    }
+    getDataSource(items) {
+        return this.state.dataSource.cloneWithRows(items);
+    }
+    updateState(dic){
+        if(!this)return; //调用者不存在(组件)
+        this.setState(dic);
+    }
+    getFavouriteKeys(){
+        favouriteDao.getFavouriteKeys()
+            .then(keys=>{
+                if(keys){
+                    this.updateState({favouriteKeys:keys})
+                }
+                this.flushFavouriteState();
+            })
+            .catch(e=>{
+                this.flushFavouriteState();
+            })
+    }
     loadData(){
         //页面加载时,或者用户下拉刷新时,显示刷新视图
-        this.setState({
+        this.updateState({
             isLoading:true
         });
         //调用数据模块, 获取用户输入关键字下的项目数据
@@ -103,55 +142,59 @@ class PopularTab extends Component{
         this.dataRepository
             .fetchRepository(url)
             .then(result=>{
-                let items = result && result.items ? result.items : result ? result : []; //最后判断result
-                //把数据赋给dataSource
-                this.setState({
-                    dataSource:this.state.dataSource.cloneWithRows(items),
-                    isLoading:false //数据返回后停止
-                });
+                this.items = result && result.items ? result.items : result ? result : []; //最后判断result
+                this.getFavouriteKeys();
                 if(result && result.update_date && !this.dataRepository.checkData(result.update_date)){
                     //数据过时,重新获取
-                    DeviceEventEmitter.emit('showToast','数据过时');
                     return this.dataRepository.fetchNetRepository(url);
-                }
-                else{
-                    DeviceEventEmitter.emit('showToast', '显示缓存数据');
                 }
             })
             .then(items=>{
-                //接收网络请求数据
                 if(!items || items.length === 0)return;
-                //刷新数据
-                this.setState({
-                    dataSource:this.state.dataSource.cloneWithRows(items),
-                    isLoading:false
-                });
-                DeviceEventEmitter.emit('showToast','显示网络数据');
+                this.items = items;
+                this.getFavouriteKeys();
             })
             .catch(err=>{
-                console.log(err);
-                this.setState({
+                this.updateState({
                     isLoading:false
                 });
             })
     }
 
-    //点击项目查看详情页面
-    onSelect(item){
+    /**
+     * 点击项目查看详情页面
+     * @param projectModel
+     */
+    onSelect(projectModel){
         this.props.navigator.push({
             component:RepositoryDetail,
             params:{
-                item:item,
+                item:projectModel.item,
                 ...this.props
             }
         });
     }
 
-    renderRow(data){
+    /**
+     * favouriteIcon的单击回调函数
+     * @param item
+     * @param isFavourite
+     */
+    onFavourite(item,isFavourite){
+        if(isFavourite){
+            favouriteDao.saveFavouriteItem(item.id.toString(),JSON.stringify(item));
+        }
+        else {
+            favouriteDao.removeFavouriteItem(item.id.toString());
+        }
+    }
+    renderRow(projectModel){
         return <RepositoryCell
-            onSelect={()=>this.onSelect(data)}
-            key={data.id}
-            data={data}/>
+            key={projectModel.item.id}
+            projectModel={projectModel}
+            onSelect={()=>this.onSelect(projectModel)}
+            onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
+        />
     }
 
     render(){
