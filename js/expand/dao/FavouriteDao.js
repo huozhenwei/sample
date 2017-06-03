@@ -8,9 +8,9 @@ import {
  *  最热,趋势,收藏模块公用
  */
 const FAVOURITE_KEY_PREFIX = 'favourite_';
-export default class FavouriteDao{
+export default class FavouriteDao {
 
-    constructor(flag){
+    constructor(flag) {
         this.flag = flag;
         this.favouriteKey = FAVOURITE_KEY_PREFIX + flag;
     }
@@ -19,18 +19,18 @@ export default class FavouriteDao{
      * 获取所有本应用可以访问到的数据
      * @returns {Promise}
      */
-    getAllData(){
-        return new Promise((resolve,reject)=>{
-            AsyncStorage.getAllKeys((error,result)=>{
-                if(!error){
-                    try{
+    getAllData() {
+        return new Promise((resolve, reject)=> {
+            AsyncStorage.getAllKeys((error, result)=> {
+                if (!error) {
+                    try {
                         resolve(result);
                     }
                     catch (e) {
                         reject(e);
                     }
                 }
-                else{
+                else {
                     reject(error);
                 }
             })
@@ -44,10 +44,10 @@ export default class FavouriteDao{
      * @param value 收藏的项目
      * @param callBack
      */
-    saveFavouriteItem(key,value,callBack){
-        AsyncStorage.setItem(key,value,(error)=>{
-            if(!error){
-                this.updateFavouriteKeys(key,true);
+    saveFavouriteItem(key, value, callBack) {
+        AsyncStorage.setItem(key, value, (error)=> {
+            if (!error) {
+                this.updateFavouriteKeys(key, true);
             }
         })
     }
@@ -56,10 +56,10 @@ export default class FavouriteDao{
      * 取消收藏,移除已经收藏的项目
      * @param key
      */
-    removeFavouriteItem(key){
-        AsyncStorage.removeItem(key,(error)=>{
-            if(!error){
-                this.updateFavouriteKeys(key,false);
+    removeFavouriteItem(key) {
+        AsyncStorage.removeItem(key, (error)=> {
+            if (!error) {
+                this.updateFavouriteKeys(key, false);
             }
         })
     }
@@ -68,18 +68,18 @@ export default class FavouriteDao{
      * 获取收藏的项目对应的key
      * @returns {Promise}
      */
-    getFavouriteKeys(){
-        return new Promise((resolve,reject)=>{
-            AsyncStorage.getItem(this.favouriteKey,(error,result)=>{
-                if(!error){
-                    try{
+    getFavouriteKeys() {
+        return new Promise((resolve, reject)=> {
+            AsyncStorage.getItem(this.favouriteKey, (error, result)=> {
+                if (!error) {
+                    try {
                         resolve(JSON.parse(result));
                     }
                     catch (e) {
                         reject(e);
                     }
                 }
-                else{
+                else {
                     reject(error);
                 }
             })
@@ -91,32 +91,65 @@ export default class FavouriteDao{
      * @param key
      * @param isAdd  true 收藏/添加, false 取消收藏/删除
      */
-    updateFavouriteKeys(key,isAdd){
+    updateFavouriteKeys(key, isAdd) {
         //取出所有已保存项目key
-        AsyncStorage.getItem(this.favouriteKey,(error,result)=>{
-            if(!error){
+        AsyncStorage.getItem(this.favouriteKey, (error, result)=> {
+            if (!error) {
                 var favouriteKeys = [];
-                if(result){
+                if (result) {
                     favouriteKeys = JSON.parse(result);
                 }
                 var index = favouriteKeys.indexOf(key);
                 //收藏
-                if(isAdd){
+                if (isAdd) {
                     //在集合中没有才添加
-                    if(index === -1){
+                    if (index === -1) {
                         favouriteKeys.push(key);
                     }
                 }
-                else{
+                else {
                     //取消收藏
-                    if(index !== -1){
-                        favouriteKeys.splice(index,1);
+                    if (index !== -1) {
+                        favouriteKeys.splice(index, 1);
                     }
                 }
                 //重新保存,覆盖?
-                AsyncStorage.setItem(this.favouriteKey,JSON.stringify(favouriteKeys));
+                AsyncStorage.setItem(this.favouriteKey, JSON.stringify(favouriteKeys));
             }
         })
     }
 
+    /**
+     * 获取用户所收藏的项目
+     */
+    getAllItem() {
+        return new Promise((resolve, reject)=> {
+            this.getFavouriteKeys()
+                .then(keys=> {
+                    var items = [];
+                    if (keys) {
+                        AsyncStorage.multiGet(keys, (err, stores)=> {
+                            try {
+                                stores.map((result, i, store)=> {
+                                    let value = store[i][1];
+                                    if (value){
+                                        items.push(JSON.parse(value));
+                                    }
+                                })
+                                resolve(items);
+                            }
+                            catch (e) {
+                                reject(e);
+                            }
+                        })
+                    }
+                    else {
+                        resolve(items);
+                    }
+                })
+                .catch((e)=> {
+                    reject(e);
+                })
+        })
+    }
 }

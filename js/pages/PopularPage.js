@@ -25,6 +25,8 @@ const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 //全局的,在不同页签下使用
 var favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_popular);
+//传入参数,初始化数据处理模块
+var dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
 export default class PopularPage extends Component{
     constructor(props){
         super(props);
@@ -84,19 +86,35 @@ export default class PopularPage extends Component{
 class PopularTab extends Component{
     constructor(props){
         super(props);
-        //传入参数,初始化数据处理模块
-        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
         this.state = {
             //为ListView 创建数据源, 规则是下一行数据不一样的时候,ListView渲染它
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
             isLoading: false, //什么时候显示刷新视图
             favouriteKeys:[]
-        }
+        };
+        this.isFavouriteChanged = false;
     }
 
     //页面完成装载时加载数据
     componentDidMount(){
         this.loadData();
+        //监听收藏模块的操作, 如果用户取消收藏,回到此页面要刷新视图
+        this.listener = DeviceEventEmitter.addListener('favouriteChanged_popular',()=>{
+            this.isFavouriteChanged = true;
+        })
+    }
+
+    componentWillUnmount(){
+        if(this.listener){
+            this.listener.remove();
+        }
+    }
+
+    componentWillReceiveProps(){
+        if(this.isFavouriteChanged){
+            this.isFavouriteChanged = false;
+            this.getFavouriteKeys();
+        }
     }
 
     /**
@@ -139,14 +157,14 @@ class PopularTab extends Component{
         });
         //调用数据模块, 获取用户输入关键字下的项目数据
         let url = URL + this.props.tabLabel + QUERY_STR;
-        this.dataRepository
+        dataRepository
             .fetchRepository(url)
             .then(result=>{
                 this.items = result && result.items ? result.items : result ? result : []; //最后判断result
                 this.getFavouriteKeys();
-                if(result && result.update_date && !this.dataRepository.checkData(result.update_date)){
+                if(result && result.update_date && !dataRepository.checkData(result.update_date)){
                     //数据过时,重新获取
-                    return this.dataRepository.fetchNetRepository(url);
+                    return dataRepository.fetchNetRepository(url);
                 }
             })
             .then(items=>{

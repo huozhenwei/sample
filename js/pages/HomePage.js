@@ -20,11 +20,12 @@ import AsyncStorageTest from '../../AsyncStorageTest';
 import MyPage from './my/MyPage';
 import Toast,{DURATION} from 'react-native-easy-toast';
 import WebViewTest from '../../WebViewTest';
+import FavouritePage from './FavouritePage';
 export default class HomePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTab: 'tb_trending'
+            selectedTab: 'tb_favorite'
         }
     }
     componentDidMount(){
@@ -59,7 +60,7 @@ export default class HomePage extends Component {
 
                     {this._renderTab(TrendingPage,'tb_trending','趋势',require('../../res/images/ic_trending.png'))}
 
-                    {this._renderTab(WebViewTest,'tb_favorite','收藏',require('../../res/images/ic_favorite.png'))}
+                    {this._renderTab(FavouritePage,'tb_favorite','收藏',require('../../res/images/ic_favorite.png'))}
 
                     {this._renderTab(MyPage,'tb_my','我的',require('../../res/images/ic_my.png'))}
 

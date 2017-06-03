@@ -163,12 +163,35 @@ class TrendingTab extends Component{
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
             isLoading: false,
             favouriteKeys:[]
-        }
+        };
+        this.isFavouriteChanged = false;
     }
 
     //页面完成装载时加载数据
     componentDidMount(){
         this.loadData(this.props.timeSpan,true);
+        //监听收藏模块的操作, 如果用户取消收藏,回到此页面要刷新视图
+        this.listener = DeviceEventEmitter.addListener('favouriteChanged_trending',()=>{
+            this.isFavouriteChanged = true;
+        });
+    }
+
+    componentWillUnmount(){
+        if(this.listener){
+            this.listener.remove();
+        }
+    }
+
+    //组件接收到新属性时候
+    componentWillReceiveProps(nextProps) {
+        //将要接收到的属性 和 当前属性
+        if (nextProps.timeSpan !== this.props.timeSpan) {
+            this.loadData(nextProps.timeSpan);
+        }
+        else if(this.isFavouriteChanged){
+            this.isFavouriteChanged = false;
+            this.getFavouriteKeys();
+        }
     }
 
     /**
@@ -203,14 +226,6 @@ class TrendingTab extends Component{
             .catch(e=>{
                 this.flushFavouriteState();
             })
-    }
-    
-    //组件接收到新属性时候
-    componentWillReceiveProps(nextProps) {
-        //将要接收到的属性 和 当前属性
-        if (nextProps.timeSpan !== this.props.timeSpan) {
-            this.loadData(nextProps.timeSpan);
-        }
     }
     onRefresh(){
         this.loadData(this.props.timeSpan,true);
