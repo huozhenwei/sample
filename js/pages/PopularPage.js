@@ -162,6 +162,12 @@ class PopularTab extends Component{
     }
 
     /**
+     * 当详情页面被卸载时,返回到这里刷新收藏按钮状态
+     */
+    onUpdateFavourite() {
+        this.getFavouriteKeys();
+    }
+    /**
      * 点击项目查看详情页面
      * @param projectModel
      */
@@ -169,8 +175,10 @@ class PopularTab extends Component{
         this.props.navigator.push({
             component:RepositoryDetail,
             params:{
-                item:projectModel.item,
-                ...this.props
+                projectModel: projectModel,
+                flag: FLAG_STORAGE.flag_popular,
+                ...this.props,
+                onUpdateFavourite:()=>this.onUpdateFavourite()
             }
         });
     }

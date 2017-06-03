@@ -213,7 +213,7 @@ class TrendingTab extends Component{
         }
     }
     onRefresh(){
-        this.loadData(this.props.timeSpan);
+        this.loadData(this.props.timeSpan,true);
     }
     loadData(timeSpan,isRefresh){
         //页面加载时,或者用户下拉刷新时,显示刷新视图
@@ -226,7 +226,7 @@ class TrendingTab extends Component{
             .then(result=>{
                 this.items = result && result.items ? result.items : result ? result : []; //最后判断result
                 this.getFavouriteKeys();
-                if(result && result.update_date && !dataRepository.checkData(result.update_date)){
+                if(!this.items||isRefresh&&result && result.update_date && !dataRepository.checkData(result.update_date)){
                     return dataRepository.fetchNetRepository(url);
                 }
             })
@@ -247,6 +247,12 @@ class TrendingTab extends Component{
     }
 
     /**
+     * 当详情页面被卸载时,返回到这里刷新收藏按钮状态
+     */
+    onUpdateFavourite() {
+        this.getFavouriteKeys();
+    }
+    /**
      * 点击项目查看详情页面
      * @param projectModel
      */
@@ -254,8 +260,10 @@ class TrendingTab extends Component{
         this.props.navigator.push({
             component:RepositoryDetail,
             params:{
-                item:projectModel.item,
-                ...this.props
+                projectModel: projectModel,
+                flag: FLAG_STORAGE.flag_trending,
+                ...this.props,
+                onUpdateFavourite:()=>this.onUpdateFavourite()
             }
         });
     }
