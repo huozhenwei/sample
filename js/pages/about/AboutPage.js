@@ -7,12 +7,14 @@ import {
     Text,
     View,
     Image,
+    Linking
 } from 'react-native';
 
 import ViewUtil from '../../util/ViewUtil';
 import {MORE_MENU} from '../../common/MoreMenu';
 import GlobalStyles from '../../../res/styles/GlobalStyles';
 import AboutCommon,{FLAG_ABOUT} from './AboutCommon';
+import WebSitePage from '../WebSitePage';
 export default class AboutPage extends Component{
 
     constructor(props) {
@@ -31,9 +33,19 @@ export default class AboutPage extends Component{
                 // params.flag = FLAG_LANGUAGE.flag_language;
                 break;
             case MORE_MENU.Website:
+                TargetComponent = WebSitePage;
+                params.url = 'https://github.com/crazycodeboy';
+                params.title = 'GitHubPopular';
                 break;
             case MORE_MENU.Feedback:
-
+                var url = 'mailto://718289183@qq.com';
+                Linking.canOpenURL(url).then(supported => {
+                    if (!supported) {
+                        console.log('Can\'t handle url: ' + url);
+                    } else {
+                        return Linking.openURL(url);
+                    }
+                }).catch(err => console.error('An error occurred', err));
                 break;
         }
         if(TargetComponent){
