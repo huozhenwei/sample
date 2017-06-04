@@ -4,7 +4,6 @@
  */
 module.exports = {
     line:{
-        flex:1,
         height:0.5,
         opacity:0.5,//半透明
         backgroundColor:'darkgray'

@@ -19,7 +19,7 @@ import ViewUtil from '../../util/ViewUtil';
 import CustomKeyPage from './CustomKeyPage';
 import SortKeyPage from './SortKeyPage';
 import {FLAG_LANGUAGE}from '../../expand/dao/LanguageDao';
-
+import AboutPage from '../about/AboutPage';
 export default class MyPage extends Component{
     constructor(props){
         super(props);
@@ -53,6 +53,7 @@ export default class MyPage extends Component{
             case MORE_MENU.About_Author:
                 break;
             case MORE_MENU.About:
+                TargetComponent = AboutPage;
                 break;
         }
         if(TargetComponent){
