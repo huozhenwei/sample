@@ -14,14 +14,129 @@ import {
 
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import ViewUtil from '../../util/ViewUtil';
+import FavouriteDao from '../../expand/dao/FavouriteDao';
+import {FLAG_STORAGE} from '../../expand/dao/DataRepository';
+import RepositoryCell from '../../common/RepositoryCell';
+import RepositoryDetail from '../RepositoryDetail';
+import Utils from '../../util/Utils';
+import RepositoryUtils from '../../expand/dao/RepositoryUtils';
 export var FLAG_ABOUT = {flag_about:'about',flag_about_me:'about_me'};
 export default class AboutCommon{
 
-    constructor(props,updateState,flag_about) {
+    constructor(props,updateState,flag_about,config) {
         this.props = props;
         this.updateState = updateState; //调用者的State
         this.flag_about  = flag_about; //区分调用者
+        this.repositories = [];
+        this.favouriteKeys = null;
+        this.favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_my);
+        this.config = config;
+        this.repositoryUtils = new RepositoryUtils(this);
     }
+
+    componentDidMount(){
+        if(this.flag_about === FLAG_ABOUT.flag_about){
+            this.repositoryUtils.fetchRepository(this.config.info.currentRepoUrl);
+        }
+        else{
+            let urls = [];
+            var items = this.config.items;
+            for(let i =0,len = items.length; i<len; i++){
+                urls.push(this.config.info.url + items[i]);
+            }
+            this.repositoryUtils.fetchRepositorys(urls);
+        }
+    }
+
+    /**
+     * 通知数据发生改变
+     * @param items 改变后的数据
+     */
+    onNotifyDataChanged(items){
+        this.updateFavourite(items);
+    }
+
+    /**
+     * 更新项目的用户收藏状态
+     * @param repositories
+     */
+    async updateFavourite(repositories){
+        if(repositories){
+            this.repositories = repositories;
+        }
+        if(!this.repositories) return;
+        if(!this.favouriteKeys) {
+            //同步方式调用
+           this.favouriteKeys = await this.favouriteDao.getFavouriteKeys();
+        }
+        //取出已收藏项目和传递过来的数据比较,拼装新数据
+        let projectModels = [];
+        for(var i=0,len = this.repositories.length;i<len;i++){
+            var data = this.repositories[i];
+            var item = data.item ? data.item : data;
+            projectModels.push({
+                isFavourite: Utils.checkFavourite(item,this.favouriteKeys ? this.favouriteKeys : []),
+                item: item
+            });
+        }
+        //刷新视图
+        this.updateState({
+            projectModels:projectModels
+        })
+    }
+
+    /**
+     * 点击项目查看详情页面
+     * @param projectModel
+     */
+    onSelect(projectModel){
+        this.props.navigator.push({
+            component:RepositoryDetail,
+            params:{
+                projectModel: projectModel,
+                flag: FLAG_STORAGE.flag_my,
+                ...this.props
+            }
+        });
+    }
+
+    /**
+     * favouriteIcon的单击回调函数
+     * @param item
+     * @param isFavourite
+     */
+    onFavourite(item,isFavourite){
+        if(isFavourite){
+            this.favouriteDao.saveFavouriteItem(item.id.toString(),JSON.stringify(item));
+        }
+        else {
+            this.favouriteDao.removeFavouriteItem(item.id.toString());
+        }
+    }
+
+    /**
+     * 创建项目视图
+     * @param projectModels
+     * @returns {*}
+     */
+    renderRepository(projectModels){
+        if(!projectModels || projectModels.length === 0)return null;
+        let views = [];
+        for(let i=0,len = projectModels.length; i<len; i++){
+            let projectModel = projectModels[i];
+            views.push(
+                <RepositoryCell
+                    key={projectModel.item.id}
+                    projectModel={projectModel}
+                    onSelect={()=>this.onSelect(projectModel)}
+                    onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
+                />
+            )
+        }
+        return views;
+    }
+
+
     getParallaxRenderConfig(params){
         let config = {};
         config.renderBackground = () => (

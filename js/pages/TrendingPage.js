@@ -241,7 +241,7 @@ class TrendingTab extends Component{
             .then(result=>{
                 this.items = result && result.items ? result.items : result ? result : []; //最后判断result
                 this.getFavouriteKeys();
-                if(!this.items||isRefresh&&result && result.update_date && !dataRepository.checkData(result.update_date)){
+                if(!this.items||isRefresh&&result && result.update_date && !Utils.checkData(result.update_date)){
                     return dataRepository.fetchNetRepository(url);
                 }
             })

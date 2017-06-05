@@ -9,7 +9,7 @@ import GitHubTrending from 'GitHubTrending';
  * 数据操作(本地读取,网络请求,缓存)
  */
 //用于标识Popular模块还是Trending模块使用
-export var FLAG_STORAGE ={flag_popular:'popular',flag_trending:'trending'};
+export var FLAG_STORAGE ={flag_popular:'popular',flag_trending:'trending',flag_my:'my'};
 export default class DataRepository{
     //flag调用者传入
     constructor(flag){
@@ -82,19 +82,24 @@ export default class DataRepository{
     fetchNetRepository(url){
         //需要向调用者返回Promise对象, 把服务器返回的信息告诉调用者
         return new Promise((resolve,reject)=> {
-            if(this.flag === FLAG_STORAGE.flag_popular){
+            if(this.flag !== FLAG_STORAGE.flag_trending){
                 //向服务器发起请求
                 fetch(url)
                     .then((response)=>response.json())
                     .then((result)=>{
-                        if(!result || !result.items){
-                            reject(new Error('responseData is null'));
-                            return;
+                        if(this.flag === FLAG_STORAGE.flag_my && result){
+                            this.saveRepository(url,result);
+                            resolve(result);
                         }
-                        //请求成功, 把返回信息告诉调用者
-                        resolve(result.items);
-                        //保存数据
-                        this.saveRepository(url,result.items);
+                        else if(result && result.items){
+                            //请求成功, 把返回信息告诉调用者
+                            resolve(result.items);
+                            //保存数据
+                            this.saveRepository(url,result.items);
+                        }
+                        else {
+                            reject(new Error('responseData is null'));
+                        }
                     })
                     .catch((error)=>{
                         //请求失败,捕捉到信息告诉调用者
@@ -126,26 +131,15 @@ export default class DataRepository{
      */
     saveRepository(url, items,callBack){
         if(!url || !items) return;
+        let wrapData;
         //加个时间戳,用于校验数据是否过期
-        let wrapData = {items:items, update_date:new Date().getTime()};
+        if(this.flag === FLAG_STORAGE.flag_my){
+            wrapData = {item:items, update_date:new Date().getTime()};
+        }
+        else{
+            wrapData = {items:items, update_date:new Date().getTime()};
+        }
         AsyncStorage.setItem(url, JSON.stringify(wrapData), callBack);
-    }
-
-    /**
-     * 判断数据是否过时
-     * @param longTime 数据的时间戳(保存在数据库的时间)
-     * @returns {boolean}
-     */
-    checkData(longTime){
-        // return false;
-        let cDate = new Date();
-        let tDate = new Date(); //目标日期
-        tDate.setTime(longTime); //以毫秒设置 Date 对象
-        if(cDate.getMonth() !== tDate.getMonth()) return false;
-        if(cDate.getDay() !== tDate.getDay()) return false;
-        //超过4个小时
-        if(cDate.getHours() - tDate.getHours() > 4) return false;
-        return true;
     }
 
 }

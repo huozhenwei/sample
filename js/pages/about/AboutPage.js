@@ -15,12 +15,24 @@ import {MORE_MENU} from '../../common/MoreMenu';
 import GlobalStyles from '../../../res/styles/GlobalStyles';
 import AboutCommon,{FLAG_ABOUT} from './AboutCommon';
 import WebSitePage from '../WebSitePage';
+import config from '../../../res/data/config.json';
 export default class AboutPage extends Component{
 
     constructor(props) {
         super(props);
         //组装者模式,把公用代码提取出来
-        this.aboutCommon = new AboutCommon(props,(dic)=>this.updateState(dic),FLAG_ABOUT.flag_about);
+        this.aboutCommon = new AboutCommon(
+            props,
+            (dic)=>this.updateState(dic),
+            FLAG_ABOUT.flag_about,
+            config
+        );
+        this.state = {
+            projectModels:[]
+        }
+    }
+    componentDidMount(){
+        this.aboutCommon.componentDidMount();
     }
     updateState(dic){
         this.setState(dic)
@@ -62,6 +74,7 @@ export default class AboutPage extends Component{
 
     render() {
         let contentView = <View>
+            {this.aboutCommon.renderRepository(this.state.projectModels)}
             {this.getItem(MORE_MENU.Website, require('../../../res/images/ic_computer.png'), MORE_MENU.Website)}
             <View style={GlobalStyles.line}/>
             {this.getItem(MORE_MENU.About_Author, require('../my/img/ic_insert_emoticon.png'), MORE_MENU.About_Author)}
