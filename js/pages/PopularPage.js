@@ -17,10 +17,10 @@ import NavigationBar from '../common/NavigationBar';
 import RepositoryCell from '../common/RepositoryCell';
 import DataRepository,{FLAG_STORAGE} from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
-import RepositoryDetail from './RepositoryDetail';
 import ProjectModel from '../model/ProjectModel';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import Utils from '../util/Utils';
+import ActionUtils from '../util/ActionUtils';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 //全局的,在不同页签下使用
@@ -186,21 +186,6 @@ class PopularTab extends Component{
     onUpdateFavourite() {
         this.getFavouriteKeys();
     }
-    /**
-     * 点击项目查看详情页面
-     * @param projectModel
-     */
-    onSelect(projectModel){
-        this.props.navigator.push({
-            component:RepositoryDetail,
-            params:{
-                projectModel: projectModel,
-                flag: FLAG_STORAGE.flag_popular,
-                ...this.props,
-                onUpdateFavourite:()=>this.onUpdateFavourite()
-            }
-        });
-    }
 
     /**
      * favouriteIcon的单击回调函数
@@ -219,7 +204,12 @@ class PopularTab extends Component{
         return <RepositoryCell
             key={projectModel.item.id}
             projectModel={projectModel}
-            onSelect={()=>this.onSelect(projectModel)}
+            onSelect={()=>ActionUtils.onSelectRepository({
+                projectModel: projectModel,
+                flag: FLAG_STORAGE.flag_popular,
+                ...this.props,
+                onUpdateFavourite:()=>this.onUpdateFavourite()
+            })}
             onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
         />
     }

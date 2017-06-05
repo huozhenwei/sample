@@ -18,10 +18,10 @@ import {FLAG_STORAGE} from '../expand/dao/DataRepository';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import RepositoryCell from '../common/RepositoryCell';
 import TrendingCell from '../common/TrendingCell';
-import RepositoryDetail from './RepositoryDetail';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import ProjectModel from '../model/ProjectModel';
 import ArrayUtils from '../util/ArrayUtils';
+import ActionUtils from '../util/ActionUtils';
 export default class FavouritePage extends Component {
     constructor(props) {
         super(props);
@@ -106,21 +106,6 @@ class FavouriteTab extends Component {
     }
 
     /**
-     * 点击项目查看详情页面
-     * @param projectModel
-     */
-    onSelect(projectModel) {
-        this.props.navigator.push({
-            component: RepositoryDetail,
-            params: {
-                projectModel: projectModel,
-                flag: this.props.flag,
-                ...this.props
-            }
-        });
-    }
-
-    /**
      * favouriteIcon的单击回调函数
      * @param item
      * @param isFavourite
@@ -150,7 +135,11 @@ class FavouriteTab extends Component {
         return <Cell
             key={this.props.flag === FLAG_STORAGE.flag_popular ? projectModel.item.id : projectModel.item.fullName}
             projectModel={projectModel}
-            onSelect={()=>this.onSelect(projectModel)}
+            onSelect={()=>ActionUtils.onSelectRepository({
+                projectModel: projectModel,
+                flag: this.props.flag,
+                ...this.props
+            })}
             onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
         />
     }

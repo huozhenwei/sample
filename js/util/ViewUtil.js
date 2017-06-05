@@ -29,9 +29,12 @@ export default class ViewUtil{
             <TouchableOpacity onPress={callBack}>
                 <View style={[styles.setting_item]}>
                     <View style={{flexDirection:'row',alignItems:'center'}}>
-                        <Image
-                            style={[{width:16,height:16,marginRight:10},tintStyle]}
-                            source={icon} resizeMode='stretch'/>
+                        {icon ?
+                            <Image
+                                style={[{width:16,height:16,marginRight:10},tintStyle]}
+                                source={icon} resizeMode='stretch'/>
+                            :<View style={{width:16,height:16,marginRight:10}}/>
+                        }
                         <Text style={{fontSize:14}}>{text}</Text>
                     </View>
                     <Image

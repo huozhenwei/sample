@@ -16,6 +16,7 @@ import GlobalStyles from '../../../res/styles/GlobalStyles';
 import AboutCommon,{FLAG_ABOUT} from './AboutCommon';
 import WebSitePage from '../WebSitePage';
 import config from '../../../res/data/config.json';
+import AboutMePage from './AboutMePage';
 export default class AboutPage extends Component{
 
     constructor(props) {
@@ -28,7 +29,8 @@ export default class AboutPage extends Component{
             config
         );
         this.state = {
-            projectModels:[]
+            projectModels:[],
+            author:config.author
         }
     }
     componentDidMount(){
@@ -41,8 +43,7 @@ export default class AboutPage extends Component{
         let TargetComponent, params = {...this.props,menuType:tab};
         switch (tab){
             case MORE_MENU.About_Author:
-                // TargetComponent = CustomKeyPage;
-                // params.flag = FLAG_LANGUAGE.flag_language;
+                TargetComponent = AboutMePage;
                 break;
             case MORE_MENU.Website:
                 TargetComponent = WebSitePage;
@@ -85,8 +86,8 @@ export default class AboutPage extends Component{
         return this.aboutCommon.renderView(contentView,{
             'name':'GitHub Popular',
             'description':'这是一个用来查看GitHub最受欢迎与最热项目的APP,它基于React Native支持Android和iOS双平台.',
-            'avatar':'http://avatar.csdn.net/1/1/E/1_fengyuzhengfan.jpg',
-            'backgroundImg':'http://www.devio.org/io/GitHubPopular/img/for_githubpopular_about_me.jpg'
+            'avatar':this.state.author.avatar1,
+            'backgroundImg':this.state.author.backgroundImg1
         });
     }
 }

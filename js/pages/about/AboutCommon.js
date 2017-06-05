@@ -17,8 +17,8 @@ import ViewUtil from '../../util/ViewUtil';
 import FavouriteDao from '../../expand/dao/FavouriteDao';
 import {FLAG_STORAGE} from '../../expand/dao/DataRepository';
 import RepositoryCell from '../../common/RepositoryCell';
-import RepositoryDetail from '../RepositoryDetail';
 import Utils from '../../util/Utils';
+import ActionUtils from '../../util/ActionUtils';
 import RepositoryUtils from '../../expand/dao/RepositoryUtils';
 export var FLAG_ABOUT = {flag_about:'about',flag_about_me:'about_me'};
 export default class AboutCommon{
@@ -86,21 +86,6 @@ export default class AboutCommon{
     }
 
     /**
-     * 点击项目查看详情页面
-     * @param projectModel
-     */
-    onSelect(projectModel){
-        this.props.navigator.push({
-            component:RepositoryDetail,
-            params:{
-                projectModel: projectModel,
-                flag: FLAG_STORAGE.flag_my,
-                ...this.props
-            }
-        });
-    }
-
-    /**
      * favouriteIcon的单击回调函数
      * @param item
      * @param isFavourite
@@ -128,7 +113,11 @@ export default class AboutCommon{
                 <RepositoryCell
                     key={projectModel.item.id}
                     projectModel={projectModel}
-                    onSelect={()=>this.onSelect(projectModel)}
+                    onSelect={()=>ActionUtils.onSelectRepository({
+                        projectModel:projectModel,
+                        ...this.props,
+                        flag: FLAG_STORAGE.flag_my
+                    })}
                     onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
                 />
             )
