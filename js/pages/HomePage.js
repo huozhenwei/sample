@@ -25,7 +25,7 @@ export default class HomePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTab: 'tb_my'
+            selectedTab: 'tb_popular'
         }
     }
     componentDidMount(){

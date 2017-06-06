@@ -17,7 +17,7 @@ const StatusBarShape = { //状态栏属性
     backgroundColor:PropTypes.string,
     //状态栏文本颜色, 以下三种之一
     barStyle: PropTypes.oneOf(['default', 'light-content', 'dark-content']),
-    hidden: PropTypes.bool,
+    hidden: PropTypes.bool
 }
 
 export default class NavigationBar extends Component{
@@ -27,9 +27,9 @@ export default class NavigationBar extends Component{
         title: PropTypes.string,   //允许用户自定义标题
         titleView: PropTypes.element,   //有些页面title位置是下拉框,不仅仅是文字
         hide:PropTypes.bool, //是否可以隐藏
-        leftButton: PropTypes.element,  //左侧按钮约束
-        rightButton: PropTypes.element, //右侧按钮约束
-        statusBar: PropTypes.shape(StatusBarShape), //允许用户自定义状态栏形状
+        leftButton: PropTypes.element,  //左侧按钮元素
+        rightButton: PropTypes.element, //右侧按钮元素
+        statusBar: PropTypes.shape(StatusBarShape) //允许用户自定义状态栏形状
     }
 
     //给部分属性设定默认值
@@ -37,18 +37,25 @@ export default class NavigationBar extends Component{
         //状态栏默认样式
         statusBar: {
             barStyle: 'light-content',
-            hidden: false,
-        },
+            hidden: false
+        }
     }
 
     constructor(props){
         super(props);
         this.state = {
             title : '', //默认为空
-            hide : false, // NavigationBar默认不隐藏
+            hide : false // NavigationBar默认不隐藏
         }
     }
 
+    getButtonElement(data) {
+        return (
+            <View style={styles.navBarButton}>
+                {data? data : null}
+            </View>
+        );
+    }
     render(){
         //页面顶部状体栏, 取出用户设置的样式
         let statusBar = <View style={styles.statusBar}>
@@ -59,11 +66,11 @@ export default class NavigationBar extends Component{
             <Text style={styles.title}>{this.props.title}</Text>;
 
         let content = <View style={styles.navBar}>
-            {this.props.leftButton}
+            {this.getButtonElement(this.props.leftButton)}
             <View style={styles.titleViewContainer}>
                 {titleView}
             </View>
-            {this.props.rightButton}
+            {this.getButtonElement(this.props.rightButton)}
         </View>;
 
         return(
@@ -77,7 +84,7 @@ export default class NavigationBar extends Component{
 
 const styles = StyleSheet.create({
     container:{
-        backgroundColor: '#2196F3',
+        backgroundColor: '#2196F3'
     },
     navBar:{
         flexDirection: 'row',
@@ -92,13 +99,16 @@ const styles = StyleSheet.create({
         left: 40,
         top: 0,
         right: 40,
-        bottom: 0,
+        bottom: 0
     },
     title: {
         fontSize: 20,
-        color: '#FFFFFF',
+        color: '#FFFFFF'
+    },
+    navBarButton: {
+        alignItems: 'center'
     },
     statusBar: {
-        height: Platform.OS === 'ios' ? STATUS_BAR_HEIGHT:0,
-    },
+        height: Platform.OS === 'ios' ? STATUS_BAR_HEIGHT:0
+    }
 });

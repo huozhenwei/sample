@@ -10,7 +10,9 @@ import {
     TextInput,
     ListView,
     RefreshControl,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    TouchableOpacity,
+    Image
 } from 'react-native';
 import ScrollableTabView,{ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import NavigationBar from '../common/NavigationBar';
@@ -21,6 +23,7 @@ import ProjectModel from '../model/ProjectModel';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import Utils from '../util/Utils';
 import ActionUtils from '../util/ActionUtils';
+import SearchPage from './SearchPage';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 //全局的,在不同页签下使用
@@ -55,7 +58,33 @@ export default class PopularPage extends Component{
             })
     }
 
+    renderRightButton(){
+        return <View>
+            <TouchableOpacity
+                onPress={()=>{
+                    this.props.navigator.push({
+                        component:SearchPage,
+                        params:{
+                            ...this.props
+                        }
+                    })
+                }}
+            >
+                <View style={{padding:5,marginRight:8}}>
+                    <Image
+                        style={{width:24,height:24}}
+                        source={require('../../res/images/ic_search_white_48pt.png')} />
+                </View>
+            </TouchableOpacity>
+        </View>
+    }
+
     render(){
+        let navigationBar = <NavigationBar
+                title={'最热'}
+                statusBar={{backgroundColor: "#2196F3"}}
+                rightButton={this.renderRightButton()}
+            />;
         //自定义标签没有加载完, 渲染ScrollableTabView时无法计算tabBar宽度
         let content = this.state.languages.length > 0
             ? <ScrollableTabView
@@ -74,10 +103,7 @@ export default class PopularPage extends Component{
         </ScrollableTabView> : null;
 
         return (<View style={styles.container}>
-            <NavigationBar
-                title='最热'
-                statusBar={{backgroundColor:'#2196F3'}}
-            />
+            {navigationBar}
             {content}
         </View>)
     }
@@ -239,9 +265,6 @@ class PopularTab extends Component{
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-    },
-    tips: {
-       fontSize: 29
-    },
+        flex: 1
+    }
 });
