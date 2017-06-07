@@ -27,6 +27,7 @@ import ActionUtils from '../util/ActionUtils';
 import ProjectModel from '../model/ProjectModel';
 import {ACTION_HOME} from './HomePage';
 import {FLAG_TAB} from './HomePage';
+import makeCancelable from '../util/Cancelable';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 export default class SearchPage extends Component {
@@ -57,6 +58,8 @@ export default class SearchPage extends Component {
             //传入事件名,类型 和 默认tab
             DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,FLAG_TAB.flag_popularTab);
         }
+        //页面返回,如果有请求,把请求取消掉
+        this.cancelable&&this.cancelable.cancel();
     }
     /**
      * 获取所有标签
@@ -132,7 +135,8 @@ export default class SearchPage extends Component {
         this.updateState({
             isLoading:true
         });
-        fetch(this.getFetchUrl(this.inputKey))
+        this.cancelable = makeCancelable(fetch(this.getFetchUrl(this.inputKey)));
+        this.cancelable.promise
             .then(response=>response.json())
             .then((responseData)=>{
                 //当前页面还在(没有被销毁)
@@ -175,11 +179,13 @@ export default class SearchPage extends Component {
     }
     onRightButtonClick(){
         if(this.state.rightButtonText === '搜索'){
-            this.updateState({rightButtonText:'取消'})
+            this.updateState({rightButtonText:'取消'});
             this.loadData();
         }
         else{
-            this.updateState({rightButtonText:'搜索',isLoading:false})
+            this.updateState({rightButtonText:'搜索',isLoading:false});
+            //取消请求
+            this.cancelable.cancel();
         }
     }
     renderNavBar(){
