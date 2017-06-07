@@ -12,7 +12,8 @@ import {
     StatusBar,
     TouchableOpacity,
     ListView,
-    ActivityIndicator
+    ActivityIndicator,
+    DeviceEventEmitter
 } from 'react-native';
 import Toast,{DURATION} from 'react-native-easy-toast';
 import RepositoryCell from '../common/RepositoryCell';
@@ -24,6 +25,8 @@ import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import Utils from '../util/Utils';
 import ActionUtils from '../util/ActionUtils';
 import ProjectModel from '../model/ProjectModel';
+import {ACTION_HOME} from './HomePage';
+import {FLAG_TAB} from './HomePage';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 export default class SearchPage extends Component {
@@ -34,6 +37,7 @@ export default class SearchPage extends Component {
         this.favouriteKeys = [];
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.keys = [];
+        this.isKeyChange = false; //记录用户是否添加过key
         this.state = {
             rightButtonText: '搜索',
             isLoading: false,
@@ -48,6 +52,12 @@ export default class SearchPage extends Component {
         this.initKeys();
     }
 
+    componentWillUnmount(){
+        if(this.isKeyChange){
+            //传入事件名,类型 和 默认tab
+            DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,FLAG_TAB.flag_popularTab);
+        }
+    }
     /**
      * 获取所有标签
      */
@@ -86,6 +96,7 @@ export default class SearchPage extends Component {
             this.languageDao.save(this.keys);
             this.toast.show(key.name + '保存成功', DURATION.LENGTH_LONG);
             this.updateState({showBottomButton:false});
+            this.isKeyChange = true;
         }
     }
 

@@ -16,27 +16,64 @@ import {
 import TabNavigator from 'react-native-tab-navigator';
 import PopularPage from './PopularPage';
 import TrendingPage from './TrendingPage';
-import AsyncStorageTest from '../../AsyncStorageTest';
 import MyPage from './my/MyPage';
 import Toast,{DURATION} from 'react-native-easy-toast';
-import WebViewTest from '../../WebViewTest';
 import FavouritePage from './FavouritePage';
+export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart'};
+export const FLAG_TAB = {
+    flag_popularTab:'tb_popular',
+    flag_trendingTab:'tb_trending',
+    flag_favoriteTab:'tb_favorite',
+    flag_myTab:'tb_my'
+};
 export default class HomePage extends Component {
     constructor(props) {
         super(props);
+        let selectedTab = this.props.selectedTab ? this.props.selectedTab : 'tb_popular';
         this.state = {
-            selectedTab: 'tb_popular'
+            selectedTab: selectedTab
         }
     }
     componentDidMount(){
-        //注册通知, 这样其他页面通过事件发射器发射名为showToast的通知,首页这里会收到
-        this.listener = DeviceEventEmitter.addListener('showToast',(text)=>{
-            this.toast.show(text,DURATION.LENGTH_LONG);
-        }) 
+        //注册通知, 这样其他页面通过事件发射器发射通知,首页这里会收到
+        this.listener = DeviceEventEmitter.addListener('ACTION_HOME',
+            (action,params)=> this.onAction(action,params));
     }
+
+    /**
+     * 重启首页
+     * @param jumpToTab 默认显示的页面
+     */
+    onRestart(jumpToTab){
+        this.props.navigator.resetTo({
+            component:HomePage,
+            params:{
+                ...this.props,
+                selectedTab:jumpToTab
+            }
+        })
+    }
+
+    /**
+     * 通知回调事件处理
+     * @param action
+     * @param params
+     */
+    onAction(action,params){
+        if(ACTION_HOME.A_RESTART === action){
+            this.onRestart(params);
+        }
+        else if(ACTION_HOME.A_SHOW_TOAST === action){
+            this.toast.show(params,DURATION.LENGTH_LONG);
+        }
+    }
+
     componentWillUnmount(){
-        this.listener&&this.listener.remove();
+        if(this.listener){
+            this.listener.remove();
+        }
     }
+
     _renderTab(Component, selectTab,title,renderIcon){
         return <TabNavigator.Item
             selected={this.state.selectedTab === selectTab}
