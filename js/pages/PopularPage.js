@@ -213,19 +213,6 @@ class PopularTab extends Component{
         this.getFavouriteKeys();
     }
 
-    /**
-     * favouriteIcon的单击回调函数
-     * @param item
-     * @param isFavourite
-     */
-    onFavourite(item,isFavourite){
-        if(isFavourite){
-            favouriteDao.saveFavouriteItem(item.id.toString(),JSON.stringify(item));
-        }
-        else {
-            favouriteDao.removeFavouriteItem(item.id.toString());
-        }
-    }
     renderRow(projectModel){
         return <RepositoryCell
             key={projectModel.item.id}
@@ -236,7 +223,8 @@ class PopularTab extends Component{
                 ...this.props,
                 onUpdateFavourite:()=>this.onUpdateFavourite()
             })}
-            onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
+            onFavourite={(item,isFavourite)=>ActionUtils.onFavourite(
+            favouriteDao, item, isFavourite, FLAG_STORAGE.flag_popular)}
         />
     }
 

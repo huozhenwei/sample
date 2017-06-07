@@ -84,21 +84,7 @@ export default class AboutCommon{
             projectModels:projectModels
         })
     }
-
-    /**
-     * favouriteIcon的单击回调函数
-     * @param item
-     * @param isFavourite
-     */
-    onFavourite(item,isFavourite){
-        if(isFavourite){
-            this.favouriteDao.saveFavouriteItem(item.id.toString(),JSON.stringify(item));
-        }
-        else {
-            this.favouriteDao.removeFavouriteItem(item.id.toString());
-        }
-    }
-
+    
     /**
      * 创建项目视图
      * @param projectModels
@@ -118,7 +104,8 @@ export default class AboutCommon{
                         ...this.props,
                         flag: FLAG_STORAGE.flag_my
                     })}
-                    onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
+                    onFavourite={(item,isFavourite)=>ActionUtils.onFavourite(
+                    this.favouriteDao, item, isFavourite, FLAG_STORAGE.flag_my)}
                 />
             )
         }

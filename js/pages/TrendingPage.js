@@ -268,20 +268,6 @@ class TrendingTab extends Component{
         this.getFavouriteKeys();
     }
 
-    /**
-     * favouriteIcon的单击回调函数
-     * @param item
-     * @param isFavourite
-     */
-    onFavourite(item,isFavourite){
-        if(isFavourite){
-            favouriteDao.saveFavouriteItem(item.fullName,JSON.stringify(item));
-        }
-        else {
-            favouriteDao.removeFavouriteItem(item.fullName);
-        }
-    }
-
     renderRow(projectModel){
         return <TrendingCell
             key={projectModel.item.fullName}
@@ -292,7 +278,8 @@ class TrendingTab extends Component{
                 ...this.props,
                 onUpdateFavourite:()=>this.onUpdateFavourite()
             })}
-            onFavourite={(item,isFavourite)=>this.onFavourite(item,isFavourite)}
+            onFavourite={(item,isFavourite)=>ActionUtils.onFavourite(
+            favouriteDao, item, isFavourite, FLAG_STORAGE.flag_trending)}
         />
     }
 
