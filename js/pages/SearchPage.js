@@ -12,6 +12,7 @@ import {
     StatusBar,
     TouchableOpacity,
     ListView,
+    ActivityIndicator
 } from 'react-native';
 import Toast,{DURATION} from 'react-native-easy-toast';
 import RepositoryCell from '../common/RepositoryCell';
@@ -19,6 +20,7 @@ import ViewUtil from '../util/ViewUtil';
 import GlobalStyles from '../../res/styles/GlobalStyles';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import {FLAG_STORAGE} from '../expand/dao/DataRepository';
+import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import Utils from '../util/Utils';
 import ActionUtils from '../util/ActionUtils';
 import ProjectModel from '../model/ProjectModel';
@@ -30,14 +32,63 @@ export default class SearchPage extends Component {
         //全局的,在不同页签下使用
         this.favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_popular);
         this.favouriteKeys = [];
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.keys = [];
         this.state = {
             rightButtonText: '搜索',
             isLoading: false,
+            showBottomButton: false,
             dataSource: new ListView.DataSource({
                 rowHasChanged: (r1, r2) => r1 !== r2
             })
         }
     }
+
+    componentDidMount() {
+        this.initKeys();
+    }
+
+    /**
+     * 获取所有标签
+     */
+    async initKeys(){
+        this.keys = await this.languageDao.fetch();
+    }
+
+    /**
+     * 检查搜索内容有没有在标签中,如果没有,就显示底部'添加标签'按钮
+     * @param keys
+     * @param key
+     */
+    checkKeyIsExist(keys,key){
+        for(let i = 0, len = keys.length; i<len; i++){
+            if(key.toLowerCase() === keys[i].name.toLowerCase()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 添加标签
+     */
+    saveKey(){
+        let key = this.inputKey;
+        if(this.checkKeyIsExist(this.keys,key)) {
+            this.toast.show(key + '已经存在', DURATION.LENGTH_LONG);
+        } else {
+            key = {
+                "path": key,
+                "name": key,
+                "checked": true //默认订阅
+            };
+            this.keys.unshift(key);
+            this.languageDao.save(this.keys);
+            this.toast.show(key.name + '保存成功', DURATION.LENGTH_LONG);
+            this.updateState({showBottomButton:false});
+        }
+    }
+
     /**
      * 更新Project Item 收藏的状态
      */
@@ -85,6 +136,12 @@ export default class SearchPage extends Component {
                 this.items = responseData.items;
                 //如果用户已收藏,还要显示收藏状态
                 this.getFavouriteKeys();
+
+                if(!this.checkKeyIsExist(this.keys,this.inputKey)){
+                    this.updateState({showBottomButton:true});
+                }else{
+                    this.updateState({showBottomButton:false});
+                }
             })
             .catch((err)=>{
                 this.updateState({
@@ -96,8 +153,7 @@ export default class SearchPage extends Component {
     getFetchUrl(key){
         return  URL + key + QUERY_STR;
     }
-    componentDidMount() {
-    }
+
     updateState(dic){
         this.setState(dic)
     }
@@ -157,15 +213,37 @@ export default class SearchPage extends Component {
         if(Platform.OS === 'ios'){
             statusBar = <View style={[styles.statusBar,{backgroundColor:'#2196F3'}]}/>
         }
-        let listView = <ListView
+        //数据加载时不显示ListView
+        let listView = !this.state.isLoading ? <ListView
             dataSource={this.state.dataSource}
             //每行返回的视图
             renderRow = {(item)=> this.renderRow(item)}
-        />;
+        /> : null;
+        let indicatorView = this.state.isLoading ?
+            <ActivityIndicator
+                size='large'
+                animating={this.state.isLoading}
+                style={styles.centering}
+            />:null;
+        let resultView = <View style={{flex:1}}>
+            {indicatorView}
+            {listView}
+        </View>;
+        let bottomButton = this.state.showBottomButton ?
+            <TouchableOpacity
+                onPress={()=>{
+                    this.saveKey()
+                }}
+                style={[styles.bottomBtn,{backgroundColor:'#2196F3'}]}>
+                <View style={styles.bottomView}>
+                    <Text style={styles.searchText}>添加标签</Text>
+                </View>
+            </TouchableOpacity> : null;
         return <View style={GlobalStyles.root_container}>
             {statusBar}
             {this.renderNavBar()}
-            {listView}
+            {resultView}
+            {bottomButton}
             <Toast ref={toast=>this.toast=toast}/>
         </View>
     }
@@ -205,5 +283,25 @@ const styles = StyleSheet.create({
         fontSize:18,
         color:'white',
         fontWeight:'500'
+    },
+    centering:{
+        justifyContent :'center',
+        alignItems:'center',
+        flex:1
+    },
+    bottomBtn:{
+        justifyContent:'center',
+        alignItems:'center',
+        opacity:0.9,
+        height:40,
+        position:'absolute',
+        left:10,
+        right:10,
+        // top: GlobalStyles.window_height - 45,
+        bottom:8,
+        borderRadius:3
+    },
+    bottomView:{
+        justifyContent :'center'
     }
 });
