@@ -9,9 +9,10 @@ import {
     Image,
     TouchableHighlight,
     TouchableOpacity,
-    Alert
+    Alert,
+    DeviceEventEmitter
 } from 'react-native';
-
+import {ACTION_HOME,FLAG_TAB} from '../../pages/HomePage';
 import NavigationBar from '../../common/NavigationBar';
 import LanguageDao, {FLAG_LANGUAGE} from '../../expand/dao/LanguageDao';
 import ArrayUtils from '../../util/ArrayUtils';
@@ -95,7 +96,11 @@ export default class SortKeyPage extends Component {
         //两数组不相等, 就获取排序后新的数组
         this.getSortResult();
         this.languageDao.save(this.sortResultArray); //保存最终结果
-        this.props.navigator.pop();
+
+        //传入事件名,类型 和 默认tab
+        var jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key
+            ? FLAG_TAB.flag_popularTab : FLAG_TAB.flag_trendingTab;
+        DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART, jumpToTab);
     }
 
     //获取重新排序后的所有标签的方法

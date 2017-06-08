@@ -24,6 +24,9 @@ import Popover from '../common/Popover';
 import ProjectModel from '../model/ProjectModel';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import Utils from '../util/Utils';
+import ViewUtil from '../util/ViewUtil';
+import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
+import {FLAG_TAB} from './HomePage';
 import ActionUtils from '../util/ActionUtils';
 //全局的,在不同页签下使用
 var favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_trending);
@@ -103,10 +106,28 @@ export default class TrendingPage extends Component{
             </TouchableOpacity>
         </View>
     }
+
+    /**
+     * 渲染更多菜单
+     */
+    renderMoreView(){
+        let params = {
+            ...this.props,fromPage:FLAG_TAB.flag_trendingTab
+        };
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Language,MORE_MENU.Sort_Language,
+            MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
+            anchorView={()=>this.refs.moreMenuButton}
+        />
+    }
+
     render(){
         let navigationBar = <NavigationBar
             titleView={this.renderTitleView()}
             statusBar={{backgroundColor:'#2196F3'}}
+            rightButton={ViewUtil.getMoreButton(()=>this.refs.moreMenu.open())}
         />;
 
         //自定义标签没有加载完, 渲染ScrollableTabView时无法计算tabBar宽度
@@ -151,6 +172,7 @@ export default class TrendingPage extends Component{
             {navigationBar}
             {content}
             {timeSpanView}
+            {this.renderMoreView()}
         </View>)
     }
 }

@@ -20,10 +20,13 @@ import RepositoryCell from '../common/RepositoryCell';
 import DataRepository,{FLAG_STORAGE} from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import ProjectModel from '../model/ProjectModel';
+import {FLAG_TAB} from './HomePage';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import Utils from '../util/Utils';
+import ViewUtil from '../util/ViewUtil';
 import ActionUtils from '../util/ActionUtils';
 import SearchPage from './SearchPage';
+import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 //全局的,在不同页签下使用
@@ -59,7 +62,7 @@ export default class PopularPage extends Component{
     }
 
     renderRightButton(){
-        return <View>
+        return <View style={{flexDirection:'row'}}>
             <TouchableOpacity
                 onPress={()=>{
                     this.props.navigator.push({
@@ -76,7 +79,25 @@ export default class PopularPage extends Component{
                         source={require('../../res/images/ic_search_white_48pt.png')} />
                 </View>
             </TouchableOpacity>
+
+            {ViewUtil.getMoreButton(()=>this.refs.moreMenu.open())}
         </View>
+    }
+
+    /**
+     * 渲染更多菜单
+     */
+    renderMoreView(){
+        let params = {
+            ...this.props,fromPage:FLAG_TAB.flag_popularTab
+        };
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Key,MORE_MENU.Sort_Key,MORE_MENU.Remove_Key,
+            MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
+            anchorView={()=>this.refs.moreMenuButton}
+        />
     }
 
     render(){
@@ -105,6 +126,7 @@ export default class PopularPage extends Component{
         return (<View style={styles.container}>
             {navigationBar}
             {content}
+            {this.renderMoreView()}
         </View>)
     }
 }

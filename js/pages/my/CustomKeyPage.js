@@ -10,12 +10,14 @@ import {
     ScrollView,
     Image,
     Alert,
+    DeviceEventEmitter,
 } from 'react-native';
 import CheckBox from 'react-native-check-box';
 import NavigationBar from '../../common/NavigationBar';
 import ViewUtil from '../../util/ViewUtil';
 import ArrayUtils from '../../util/ArrayUtils';
 import LanguageDao,{FLAG_LANGUAGE} from '../../expand/dao/LanguageDao';
+import {ACTION_HOME,FLAG_TAB} from '../../pages/HomePage';
 export default class CustomKeyPage extends Component{
     constructor(props){
         super(props);
@@ -145,7 +147,11 @@ export default class CustomKeyPage extends Component{
         }
         //this.changeValues仅用于判断用户是否操作, 数据的变化实时同步到dataArray, 保存dataArray即可
         this.languageDao.save(this.state.dataArray);
-        this.props.navigator.pop();
+
+        //传入事件名,类型 和 默认tab
+        var jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key
+            ? FLAG_TAB.flag_popularTab : FLAG_TAB.flag_trendingTab;
+        DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART, jumpToTab);
     }
 
     render(){

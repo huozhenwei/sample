@@ -12,6 +12,7 @@ import {
     View,
     Image,
     TouchableOpacity,
+    TouchableHighlight,
 } from 'react-native';
 
 export default class ViewUtil{
@@ -71,6 +72,27 @@ export default class ViewUtil{
                 <Text style={{fontSize: 20, color: '#FFFFFF'}}>{title}</Text>
             </View>
         </TouchableOpacity>
+    }
+
+    /**
+     * 获取更多按钮
+     * @param callBack
+     * @returns {XML}
+     */
+    static getMoreButton(callBack){
+        return <TouchableHighlight
+            onPress={callBack}
+            ref="moreMenuButton"
+            style={{padding:5}}
+            underlayColor={'transparent'}
+        >
+            <View style={{paddingRight:8}}>
+                <Image
+                    style={{width:24,height:24}}
+                    source={require('../../res/images/ic_more_vert_white_48pt.png')}
+                />
+            </View>
+        </TouchableHighlight>
     }
 }
 

@@ -345,13 +345,16 @@ var Popover = React.createClass({
         arrowTransform.unshift({rotate: this.getArrowRotation(placement)});
         arrowStyle = [...arrowStyle, {transform: arrowTransform}];
 
+        //自定义
+        var contentMarginRight=this.props.contentMarginRight? this.props.contentMarginRight:0;
+
         return (
             <TouchableWithoutFeedback onPress={this.props.onClose}>
                 <View style={[styles.container, contentSizeAvailable && styles.containerVisible ]}>
                     <Animated.View style={[styles.background, ...extendedStyles.background]}/>
                     <Animated.View style={[styles.popover, {
             top: popoverOrigin.y,
-            left: popoverOrigin.x,
+            left: popoverOrigin.x - contentMarginRight,
             }, ...extendedStyles.popover]}>
                         {/*<Animated.View style={arrowStyle}/>*/}
                         <Animated.View ref='content' onLayout={this.measureContent} style={contentStyle}>

@@ -22,6 +22,9 @@ import FavouriteDao from '../expand/dao/FavouriteDao';
 import ProjectModel from '../model/ProjectModel';
 import ArrayUtils from '../util/ArrayUtils';
 import ActionUtils from '../util/ActionUtils';
+import ViewUtil from '../util/ViewUtil';
+import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
+import {FLAG_TAB} from './HomePage';
 export default class FavouritePage extends Component {
     constructor(props) {
         super(props);
@@ -30,7 +33,26 @@ export default class FavouritePage extends Component {
     componentDidMount() {
     }
 
+    /**
+     * 渲染更多菜单
+     */
+    renderMoreView(){
+        let params = {
+            ...this.props,fromPage:FLAG_TAB.flag_trendingTab
+        };
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
+            anchorView={()=>this.refs.moreMenuButton}
+        />
+    }
     render() {
+        let navigationBar = <NavigationBar
+            title='收藏'
+            statusBar={{backgroundColor:'#2196F3'}}
+            rightButton={ViewUtil.getMoreButton(()=>this.refs.moreMenu.open())}
+        />;
         let content = <ScrollableTabView
             initialPage={0}
             tabBarBackgroundColor='#2196F3'
@@ -44,11 +66,9 @@ export default class FavouritePage extends Component {
         </ScrollableTabView>;
 
         return (<View style={styles.container}>
-            <NavigationBar
-                title='收藏'
-                statusBar={{backgroundColor:'#2196F3'}}
-            />
+            {navigationBar}
             {content}
+            {this.renderMoreView()}
         </View>)
     }
 }
