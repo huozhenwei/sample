@@ -21,11 +21,25 @@ import SortKeyPage from './SortKeyPage';
 import {FLAG_LANGUAGE}from '../../expand/dao/LanguageDao';
 import AboutPage from '../about/AboutPage';
 import AboutMePage from '../about/AboutMePage';
-
-export default class MyPage extends Component{
+import CustomThemePage from './CustomTheme';
+import BaseComponent from '../BaseComponent';
+export default class MyPage extends BaseComponent{
     constructor(props){
         super(props);
+        this.state = {
+            customThemeViewVisible:false,
+            theme:this.props.theme
+        }
     }
+
+    renderCustomThemeView(){
+        return (<CustomThemePage
+            visible = {this.state.customThemeViewVisible}
+            {...this.props}
+            onClose={()=> this.setState({customThemeViewVisible:false})}
+        />)
+    }
+
     onClick(tab){
         let TargetComponent, params = {...this.props,menuType:tab};
         switch (tab){
@@ -51,6 +65,7 @@ export default class MyPage extends Component{
                 params.isRemoveKey = true; //用于标识进入标签删除功能
                 break;
             case MORE_MENU.Custom_Theme:
+                this.setState({customThemeViewVisible:true});
                 break;
             case MORE_MENU.About_Author:
                 TargetComponent = AboutMePage;
@@ -67,12 +82,12 @@ export default class MyPage extends Component{
         }
     }
     getItem(tag,icon,text){
-        return ViewUtil.getSettingItem(()=>this.onClick(tag),icon,text,{tintColor:'#2196F3'},null);
+        return ViewUtil.getSettingItem(()=>this.onClick(tag),icon,text,this.state.theme.styles.tabBarSelectedIcon,null);
     }
     render(){
         let navigatorBar = <NavigationBar
             title='我的'
-            style={{backgroundColor:'#2196F3'}}
+            style={this.state.theme.styles.navBar}
         />;
         return (<View style={GlobalStyles.root_container}>
             {navigatorBar}
@@ -83,12 +98,12 @@ export default class MyPage extends Component{
                     <View style={styles.item}>
                         <View style={{flexDirection:'row',alignItems:'center'}}>
                             <Image
-                                style={[{width:40,height:40,marginRight:10},{tintColor:'#2196F3'}]}
+                                style={[{width:40,height:40,marginRight:10},this.state.theme.styles.tabBarSelectedIcon]}
                                 source={require('../../../res/images/ic_trending.png')}/>
                             <Text>GitHub Popular</Text>
                         </View>
                         <Image
-                            style={[{marginRight:0,height:22,width:22},{tintColor:'#2196F3'}]}
+                            style={[{marginRight:0,height:22,width:22},this.state.theme.styles.tabBarSelectedIcon]}
                             source={require('../../../res/images/ic_tiaozhuan.png')}/>
                     </View>
                 </TouchableHighlight>
@@ -125,6 +140,7 @@ export default class MyPage extends Component{
                 {this.getItem(MORE_MENU.About_Author, require('./img/ic_insert_emoticon.png'), '关于作者')}
                 <View style={[{marginBottom: 60}]}/>
             </ScrollView>
+            {this.renderCustomThemeView()}
         </View>)
     }
 }

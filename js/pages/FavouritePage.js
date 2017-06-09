@@ -23,14 +23,25 @@ import ProjectModel from '../model/ProjectModel';
 import ArrayUtils from '../util/ArrayUtils';
 import ActionUtils from '../util/ActionUtils';
 import ViewUtil from '../util/ViewUtil';
+import BaseComponent from './BaseComponent';
 import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
 import {FLAG_TAB} from './HomePage';
-export default class FavouritePage extends Component {
+import CustomThemePage from './my/CustomTheme';
+export default class FavouritePage extends BaseComponent {
     constructor(props) {
         super(props);
+        this.state = {
+            theme:this.props.theme,
+            customThemeViewVisible:false
+        }
     }
 
-    componentDidMount() {
+    renderCustomThemeView(){
+        return (<CustomThemePage
+            visible = {this.state.customThemeViewVisible}
+            {...this.props}
+            onClose={()=> this.setState({customThemeViewVisible:false})}
+        />)
     }
 
     /**
@@ -45,21 +56,31 @@ export default class FavouritePage extends Component {
             {...params}
             menus={[MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
             anchorView={()=>this.refs.moreMenuButton}
+            onMoreMenuSelect={(e)=>{
+                if(e===MORE_MENU.Custom_Theme){
+                    this.setState({customThemeViewVisible:true});
+                }
+            }}
         />
     }
     render() {
+        var statusBar = {
+            backgroundColor: this.state.theme.themeColor
+        };
         let navigationBar = <NavigationBar
             title='收藏'
-            statusBar={{backgroundColor:'#2196F3'}}
+            statusBar={statusBar}
+            style = {this.state.theme.styles.navBar}
             rightButton={ViewUtil.getMoreButton(()=>this.refs.moreMenu.open())}
         />;
         let content = <ScrollableTabView
             initialPage={0}
-            tabBarBackgroundColor='#2196F3'
+            tabBarBackgroundColor={this.state.theme.themeColor}
             tabBarInactiveTextColor='mintcream'
             tabBarActiveTextColor='white'
             tabBarUnderlineStyle={{backgroundColor:'#e7e7e7',height:2}}
-            renderTabBar={()=><ScrollableTabBar/>}
+            renderTabBar={()=><ScrollableTabBar style={{height: 40, borderWidth: 0, elevation: 2}}
+                tabStyle={{height: 39}}/>}
         >
             <FavouriteTab tabLabel='最热' {...this.props} flag={FLAG_STORAGE.flag_popular}/>
             <FavouriteTab tabLabel='趋势' {...this.props} flag={FLAG_STORAGE.flag_trending}/>
@@ -69,6 +90,7 @@ export default class FavouritePage extends Component {
             {navigationBar}
             {content}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>)
     }
 }
@@ -80,7 +102,8 @@ class FavouriteTab extends Component {
         this.state = {
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
             isLoading: false,
-            favouriteKeys: []
+            favouriteKeys: [],
+            theme:this.props.theme
         }
         this.unFavouriteItems = [];
     }
@@ -155,6 +178,7 @@ class FavouriteTab extends Component {
         return <Cell
             key={this.props.flag === FLAG_STORAGE.flag_popular ? projectModel.item.id : projectModel.item.fullName}
             projectModel={projectModel}
+            theme={this.props.theme}
             onSelect={()=>ActionUtils.onSelectRepository({
                 projectModel: projectModel,
                 flag: this.props.flag,
@@ -177,12 +201,12 @@ class FavouriteTab extends Component {
                 //下拉刷新
                 refreshControl={
                     <RefreshControl
+                        title='Loading...'
+                        titleColor={this.state.theme.themeColor}
+                        colors={[this.state.theme.themeColor]}
                         refreshing={this.state.isLoading}
                         onRefresh={()=>this.loadData()}
-                        colors={['#2196F3']}
-                        tintColor={'#2196F3'}
-                        title='Loading'
-                        titleColor={'#2196F3'}
+                        tintColor={this.state.theme.themeColor}
                     />}
             />
         </View>
@@ -191,9 +215,9 @@ class FavouriteTab extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 1
     },
     tips: {
         fontSize: 29
-    },
+    }
 });

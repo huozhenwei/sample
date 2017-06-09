@@ -24,7 +24,9 @@ import Popover from '../common/Popover';
 import ProjectModel from '../model/ProjectModel';
 import FavouriteDao from '../expand/dao/FavouriteDao';
 import Utils from '../util/Utils';
+import BaseComponent from './BaseComponent';
 import ViewUtil from '../util/ViewUtil';
+import CustomThemePage from './my/CustomTheme';
 import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
 import {FLAG_TAB} from './HomePage';
 import ActionUtils from '../util/ActionUtils';
@@ -38,7 +40,7 @@ var timeSpanTextArray = [
     new TimeSpan('本 月','since=monthly')
 ];
 const API_URL = 'https://github.com/trending/';
-export default class TrendingPage extends Component{
+export default class TrendingPage extends BaseComponent{
     constructor(props){
         super(props);
         //初始化LanguageDao
@@ -47,17 +49,15 @@ export default class TrendingPage extends Component{
             languages:[], //语言标签
             isVisible: false, //使用Popover
             buttonRect: {},
-            timeSpan: timeSpanTextArray[0]
-        }
+            timeSpan: timeSpanTextArray[0],
+            theme:this.props.theme,
+            customThemeViewVisible:false
+        };
+        this.loadLanguage();
     }
 
-    //组件完成加载时候就调用
-    componentDidMount(){
-        this.loadData();
-    }
-
-    //通过LanguageDao读取本地标签
-    loadData(){
+    //通过LanguageDao读取语言
+    loadLanguage(){
         this.languageDao.fetch()
             .then(result=>{
                 this.setState({
@@ -120,25 +120,44 @@ export default class TrendingPage extends Component{
             menus={[MORE_MENU.Custom_Language,MORE_MENU.Sort_Language,
             MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
             anchorView={()=>this.refs.moreMenuButton}
+            onMoreMenuSelect={(e)=>{
+                if(e===MORE_MENU.Custom_Theme){
+                    this.setState({customThemeViewVisible:true});
+                }
+            }}
         />
+    }
+    renderCustomThemeView(){
+        return (<CustomThemePage
+            visible = {this.state.customThemeViewVisible}
+            {...this.props}
+            onClose={()=> this.setState({customThemeViewVisible:false})}
+        />)
     }
 
     render(){
+        var statusBar = {
+            backgroundColor: this.state.theme.themeColor
+        };
         let navigationBar = <NavigationBar
             titleView={this.renderTitleView()}
-            statusBar={{backgroundColor:'#2196F3'}}
+            statusBar={statusBar}
+            style = {this.state.theme.styles.navBar}
             rightButton={ViewUtil.getMoreButton(()=>this.refs.moreMenu.open())}
         />;
 
         //自定义标签没有加载完, 渲染ScrollableTabView时无法计算tabBar宽度
         let content = this.state.languages.length > 0
             ? <ScrollableTabView
-            tabBarBackgroundColor='#2196F3'
+            tabBarUnderlineStyle={{backgroundColor:'#e7e7e7',height:2}}
             tabBarInactiveTextColor='mintcream'
             tabBarActiveTextColor='white'
-            tabBarUnderlineStyle={{backgroundColor:'#e7e7e7',height:2}}
-            renderTabBar={()=><ScrollableTabBar/>}>
-
+            ref="scrollableTabView"
+            tabBarBackgroundColor={this.state.theme.themeColor}
+            initialPage={0}
+            renderTabBar={()=><ScrollableTabBar style={{height: 40, borderWidth: 0, elevation: 2}}
+                tabStyle={{height: 39}}/>}
+        >
             {/* 根据用户自定义标签来渲染PopularTab */}
             {this.state.languages.map((result,i,arr)=>{
                 let lan = arr[i];
@@ -167,12 +186,13 @@ export default class TrendingPage extends Component{
                     </TouchableOpacity>
                 })}
             </View>
-        </Popover>
+        </Popover>;
         return (<View style={styles.container}>
             {navigationBar}
             {content}
             {timeSpanView}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>)
     }
 }
@@ -184,7 +204,8 @@ class TrendingTab extends Component{
             //为ListView 创建数据源, 规则是下一行数据不一样的时候,ListView渲染它
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
             isLoading: false,
-            favouriteKeys:[]
+            favouriteKeys:[],
+            theme:this.props.theme
         };
         this.isFavouriteChanged = false;
     }
@@ -213,6 +234,10 @@ class TrendingTab extends Component{
         else if(this.isFavouriteChanged){
             this.isFavouriteChanged = false;
             this.getFavouriteKeys();
+        }
+        else if(nextProps.theme !=this.state.theme){
+            this.updateState({theme:nextProps.theme});
+            this.flushFavouriteState();
         }
     }
 
@@ -294,6 +319,7 @@ class TrendingTab extends Component{
         return <TrendingCell
             key={projectModel.item.fullName}
             projectModel={projectModel}
+            theme={this.props.theme}
             onSelect={()=>ActionUtils.onSelectRepository({
                 projectModel: projectModel,
                 flag: FLAG_STORAGE.flag_trending,
@@ -316,12 +342,12 @@ class TrendingTab extends Component{
                 //下拉刷新
                 refreshControl={
                     <RefreshControl
+                        title={'Loading...'}
+                        titleColor={this.state.theme.themeColor}
+                        colors={[this.state.theme.themeColor]}
                         refreshing={this.state.isLoading}
                         onRefresh={()=>this.onRefresh()}
-                        colors={['#2196F3']}
-                        tintColor={'#2196F3'}
-                        title={'Loading'}
-                        titleColor={'#2196F3'}
+                        tintColor={this.state.theme.themeColor}
                     />}
             />
         </View>

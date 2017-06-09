@@ -70,7 +70,7 @@ export default class AboutPage extends Component{
     }
 
     getItem(tag,icon,text){
-        return ViewUtil.getSettingItem(()=>this.onClick(tag),icon,text,{tintColor:'#2196F3'},null);
+        return ViewUtil.getSettingItem(()=>this.onClick(tag),icon,text,this.props.theme.styles.tabBarSelectedIcon,null);
     }
 
     render() {

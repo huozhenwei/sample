@@ -14,6 +14,7 @@ import {
 
 import NavigationBar from '../common/NavigationBar';
 import HomePage from './HomePage';
+import ThemeDao from '../expand/dao/ThemeDao';
 export default class WelcomePage extends Component{
     constructor(props){
         super(props);
@@ -21,13 +22,20 @@ export default class WelcomePage extends Component{
 
     //暂停两秒 进入主页
     componentDidMount(){
+        new ThemeDao().getTheme()
+            .then((data)=>{
+                this.theme = data;
+            });
         this.timer = setTimeout(()=>{
             /**
              * 用resetTo 而不用push?
              * 要在欢迎页重置页面栈中的路由, 然后让主页成为栈中的第一个组件,前面的组件就不在需要了.
              */
             this.props.navigator.resetTo({
-                component:HomePage
+                component:HomePage,
+                params:{
+                    theme:this.theme
+                }
             })
         },2000);
     }
@@ -50,9 +58,9 @@ export default class WelcomePage extends Component{
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 1
     },
     tips: {
         fontSize: 29
-    },
+    }
 });

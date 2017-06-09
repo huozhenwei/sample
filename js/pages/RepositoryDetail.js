@@ -90,7 +90,7 @@ export default class RepositoryDetail extends Component{
             <View style={styles.container}>
                 <NavigationBar
                     title={this.state.title}
-                    style={{backgroundColor:'#2196F3'}}
+                    style={this.props.theme.styles.navBar}
                     leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
                     rightButton={this.renderRightButton()}
                 />

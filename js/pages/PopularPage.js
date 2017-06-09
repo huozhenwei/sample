@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import ScrollableTabView,{ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import NavigationBar from '../common/NavigationBar';
+import BaseComponent from './BaseComponent';
 import RepositoryCell from '../common/RepositoryCell';
 import DataRepository,{FLAG_STORAGE} from '../expand/dao/DataRepository';
 import LanguageDao,{FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
@@ -26,6 +27,7 @@ import Utils from '../util/Utils';
 import ViewUtil from '../util/ViewUtil';
 import ActionUtils from '../util/ActionUtils';
 import SearchPage from './SearchPage';
+import CustomThemePage from './my/CustomTheme';
 import MoreMenu,{MORE_MENU} from '../common/MoreMenu';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
@@ -33,23 +35,21 @@ const QUERY_STR = '&sort=stars';
 var favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_popular);
 //传入参数,初始化数据处理模块
 var dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
-export default class PopularPage extends Component{
+export default class PopularPage extends BaseComponent{
     constructor(props){
         super(props);
         //初始化LanguageDao
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.state = {
-            languages:[] //语言标签
-        }
-    }
-
-    //组件完成加载时候就调用
-    componentDidMount(){
-        this.loadData();
+            languages:[], //语言标签
+            theme:this.props.theme,
+            customThemeViewVisible:false
+        };
+        this.loadKey();
     }
 
     //通过LanguageDao读取本地标签
-    loadData(){
+    loadKey(){
         this.languageDao.fetch()
             .then(result=>{
                 this.setState({
@@ -97,24 +97,43 @@ export default class PopularPage extends Component{
             menus={[MORE_MENU.Custom_Key,MORE_MENU.Sort_Key,MORE_MENU.Remove_Key,
             MORE_MENU.Custom_Theme,MORE_MENU.About_Author,MORE_MENU.About]}
             anchorView={()=>this.refs.moreMenuButton}
+            onMoreMenuSelect={(e)=>{
+                if(e===MORE_MENU.Custom_Theme){
+                    this.setState({customThemeViewVisible:true});
+                }
+            }}
         />
+    }
+    renderCustomThemeView(){
+        return (<CustomThemePage
+            visible = {this.state.customThemeViewVisible}
+            {...this.props}
+            onClose={()=> this.setState({customThemeViewVisible:false})}
+        />)
     }
 
     render(){
+        var statusBar = {
+            backgroundColor: this.state.theme.themeColor
+        };
         let navigationBar = <NavigationBar
                 title={'最热'}
-                statusBar={{backgroundColor: "#2196F3"}}
+                statusBar={statusBar}
+                style = {this.state.theme.styles.navBar}
                 rightButton={this.renderRightButton()}
             />;
         //自定义标签没有加载完, 渲染ScrollableTabView时无法计算tabBar宽度
         let content = this.state.languages.length > 0
             ? <ScrollableTabView
-            tabBarBackgroundColor='#2196F3'
+            tabBarUnderlineStyle={{backgroundColor:'#e7e7e7',height:2}}
             tabBarInactiveTextColor='mintcream'
             tabBarActiveTextColor='white'
-            tabBarUnderlineStyle={{backgroundColor:'#e7e7e7',height:2}}
-            renderTabBar={()=><ScrollableTabBar/>}>
-
+            ref="scrollableTabView"
+            tabBarBackgroundColor={this.state.theme.themeColor}
+            initialPage={0}
+            renderTabBar={()=><ScrollableTabBar style={{height: 40, borderWidth: 0, elevation: 2}}
+                tabStyle={{height: 39}}/>}
+        >
             {/* 根据用户自定义标签来渲染PopularTab */}
             {this.state.languages.map((result,i,arr)=>{
                 let lan = arr[i];
@@ -127,6 +146,7 @@ export default class PopularPage extends Component{
             {navigationBar}
             {content}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>)
     }
 }
@@ -138,7 +158,8 @@ class PopularTab extends Component{
             //为ListView 创建数据源, 规则是下一行数据不一样的时候,ListView渲染它
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
             isLoading: false, //什么时候显示刷新视图
-            favouriteKeys:[]
+            favouriteKeys:[],
+            theme:this.props.theme
         };
         this.isFavouriteChanged = false;
     }
@@ -158,10 +179,14 @@ class PopularTab extends Component{
         }
     }
 
-    componentWillReceiveProps(){
+    componentWillReceiveProps(nextProps){
         if(this.isFavouriteChanged){
             this.isFavouriteChanged = false;
             this.getFavouriteKeys();
+        }
+        else if(nextProps.theme !=this.state.theme){
+            this.updateState({theme:nextProps.theme});
+            this.flushFavouriteState();
         }
     }
 
@@ -239,6 +264,7 @@ class PopularTab extends Component{
         return <RepositoryCell
             key={projectModel.item.id}
             projectModel={projectModel}
+            theme={this.props.theme}
             onSelect={()=>ActionUtils.onSelectRepository({
                 projectModel: projectModel,
                 flag: FLAG_STORAGE.flag_popular,
@@ -261,12 +287,12 @@ class PopularTab extends Component{
                 //下拉刷新
                 refreshControl={
                     <RefreshControl
+                        title={'Loading...'}
+                        titleColor={this.state.theme.themeColor}
+                        colors={[this.state.theme.themeColor]}
                         refreshing={this.state.isLoading}
                         onRefresh={()=>this.loadData()}
-                        colors={['#2196F3']}
-                        tintColor={'#2196F3'}
-                        title={'Loading'}
-                        titleColor={'#2196F3'}
+                        tintColor={this.state.theme.themeColor}
                     />}
             />
         </View>

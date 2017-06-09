@@ -166,7 +166,7 @@ export default class AboutMePage extends Component{
             let title = isShowAccount ? dic[i].title + ': ' + dic[i].account : dic[i].title;
             views.push(
                 <View key={i}>
-                    {ViewUtil.getSettingItem(()=>this.onClick(dic[i]), '', title, {tintColor:'#2196F3'}, null)}
+                    {ViewUtil.getSettingItem(()=>this.onClick(dic[i]), '', title, this.props.theme.styles.tabBarSelectedIcon, null)}
                     <View style={GlobalStyles.line}/>
                 </View>
             )
@@ -176,22 +176,22 @@ export default class AboutMePage extends Component{
     render() {
         let contentView = <View>
             {ViewUtil.getSettingItem(()=>this.onClick(FLAG.BLOG), require('../../../res/images/ic_computer.png'),
-                FLAG.BLOG.name, {tintColor:'#2196F3'}, this.getClickIcon(this.state.showBlog))}
+                FLAG.BLOG.name, this.props.theme.styles.tabBarSelectedIcon, this.getClickIcon(this.state.showBlog))}
             <View style={GlobalStyles.line}/>
             {this.state.showBlog ? this.renderItems(FLAG.BLOG.items, false) : null}
 
             {ViewUtil.getSettingItem(()=>this.onClick(FLAG.REPOSITORY), require('../../../res/images/ic_code.png'),
-                FLAG.REPOSITORY, {tintColor:'#2196F3'}, this.getClickIcon(this.state.showRepository))}
+                FLAG.REPOSITORY, this.props.theme.styles.tabBarSelectedIcon, this.getClickIcon(this.state.showRepository))}
             <View style={GlobalStyles.line}/>
             {this.state.showRepository ? this.aboutCommon.renderRepository(this.state.projectModels):null}
 
             {ViewUtil.getSettingItem(()=>this.onClick(FLAG.QQ), require('../../../res/images/ic_computer.png'),
-                FLAG.QQ.name, {tintColor:'#2196F3'}, this.getClickIcon(this.state.showQQ))}
+                FLAG.QQ.name, this.props.theme.styles.tabBarSelectedIcon, this.getClickIcon(this.state.showQQ))}
             <View style={GlobalStyles.line}/>
             {this.state.showQQ ? this.renderItems(FLAG.QQ.items, true) : null}
 
             {ViewUtil.getSettingItem(()=>this.onClick(FLAG.CONTACT), require('../../../res/images/ic_contacts.png'),
-                FLAG.CONTACT.name, {tintColor:'#2196F3'}, this.getClickIcon(this.state.showContact))}
+                FLAG.CONTACT.name, this.props.theme.styles.tabBarSelectedIcon, this.getClickIcon(this.state.showContact))}
             <View style={GlobalStyles.line}/>
             {this.state.showContact ? this.renderItems(FLAG.CONTACT.items, true) : null}
         </View>;

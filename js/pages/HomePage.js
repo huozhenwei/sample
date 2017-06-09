@@ -14,27 +14,32 @@ import {
 } from 'react-native';
 
 import TabNavigator from 'react-native-tab-navigator';
+import BaseComponent from './BaseComponent';
 import PopularPage from './PopularPage';
 import TrendingPage from './TrendingPage';
 import MyPage from './my/MyPage';
 import Toast,{DURATION} from 'react-native-easy-toast';
 import FavouritePage from './FavouritePage';
-export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart'};
+export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart',A_THEME:'theme'};
 export const FLAG_TAB = {
     flag_popularTab:'tb_popular',
     flag_trendingTab:'tb_trending',
     flag_favoriteTab:'tb_favorite',
     flag_myTab:'tb_my'
 };
-export default class HomePage extends Component {
+export default class HomePage extends BaseComponent {
     constructor(props) {
         super(props);
         let selectedTab = this.props.selectedTab ? this.props.selectedTab : 'tb_popular';
         this.state = {
-            selectedTab: selectedTab
+            selectedTab: selectedTab,
+            theme: this.props.theme
         }
     }
+
     componentDidMount(){
+        //因为子类重写componentDidMount方法,这里要手动调用,让基类此方法生效
+        super.componentDidMount();
         //注册通知, 这样其他页面通过事件发射器发射通知,首页这里会收到
         this.listener = DeviceEventEmitter.addListener('ACTION_HOME',
             (action,params)=> this.onAction(action,params));
@@ -69,6 +74,7 @@ export default class HomePage extends Component {
     }
 
     componentWillUnmount(){
+        super.componentWillUnmount();
         if(this.listener){
             this.listener.remove();
         }
@@ -77,14 +83,14 @@ export default class HomePage extends Component {
     _renderTab(Component, selectTab,title,renderIcon){
         return <TabNavigator.Item
             selected={this.state.selectedTab === selectTab}
-            selectedTitleStyle={{color:'#2196F3'}}
+            selectedTitleStyle={this.state.theme.styles.selectedTitleStyle}
             title={title}
             renderIcon={() => <Image style={styles.image}
                  source={renderIcon} />}
-            renderSelectedIcon={() => <Image style={[styles.image,{tintColor:'#2196F3'}]}
+            renderSelectedIcon={() => <Image style={[styles.image,this.state.theme.styles.tabBarSelectedIcon]}
                  source={renderIcon} />}
             onPress={() => this.setState({ selectedTab: selectTab })}>
-            <Component {...this.props} />
+            <Component {...this.props} theme={this.state.theme}/>
         </TabNavigator.Item>;
     }
 

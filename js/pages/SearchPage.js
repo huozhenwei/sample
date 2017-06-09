@@ -206,7 +206,7 @@ export default class SearchPage extends Component {
                 <Text style={styles.searchText}>{this.state.rightButtonText}</Text>
             </View>
         </TouchableOpacity>;
-        return <View style={styles.navBar}>
+        return <View style={[styles.navBar,this.props.theme.styles.navBar]}>
             {backButton}
             {inputView}
             {rightButton}
@@ -216,6 +216,7 @@ export default class SearchPage extends Component {
         return <RepositoryCell
             key={projectModel.item.id}
             projectModel={projectModel}
+            theme={this.props.theme}
             onSelect={()=>ActionUtils.onSelectRepository({
                 projectModel: projectModel,
                 flag: FLAG_STORAGE.flag_popular,
@@ -228,7 +229,7 @@ export default class SearchPage extends Component {
     render() {
         let statusBar = null;
         if(Platform.OS === 'ios'){
-            statusBar = <View style={[styles.statusBar,{backgroundColor:'#2196F3'}]}/>
+            statusBar = <View style={[styles.statusBar,this.props.theme.styles.navBar]}/>
         }
         //数据加载时不显示ListView
         let listView = !this.state.isLoading ? <ListView
@@ -251,7 +252,7 @@ export default class SearchPage extends Component {
                 onPress={()=>{
                     this.saveKey()
                 }}
-                style={[styles.bottomBtn,{backgroundColor:'#2196F3'}]}>
+                style={[styles.bottomBtn,this.props.theme.styles.navBar]}>
                 <View style={styles.bottomView}>
                     <Text style={styles.searchText}>添加标签</Text>
                 </View>
@@ -274,7 +275,6 @@ const styles = StyleSheet.create({
         height:20
     },
     navBar:{
-        backgroundColor:'#2196F3',
         flexDirection:'row',
         alignItems:'center',
         height:(Platform.OS === 'ios') ? GlobalStyles.nav_bar_height_ios

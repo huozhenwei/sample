@@ -128,7 +128,7 @@ export default class SortKeyPage extends Component {
         return (<View style={styles.container}>
             <NavigationBar
                 title={title}
-                style={{backgroundColor:'#2196F3'}}
+                style={this.props.theme.styles.navBar}
                 leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
                 rightButton={rightButton}
             />
@@ -140,7 +140,7 @@ export default class SortKeyPage extends Component {
                     this.state.checkedArray.splice(e.to, 0, this.state.checkedArray.splice(e.from, 1)[0]);
                     this.forceUpdate();
                 }}
-                renderRow={row => <SortCell data={row} />}
+                renderRow={row => <SortCell data={row} {...this.props}/>}
             />
         </View>)
     }
@@ -156,7 +156,7 @@ class SortCell extends Component {
                 {...this.props.sortHandlers}
             >
                 <View style={styles.row}>
-                    <Image style={styles.image}
+                    <Image style={[styles.image,this.props.theme.styles.tabBarSelectedIcon]}
                            source={require('./img/ic_sort.png')}/>
                     <Text>{this.props.data.name}</Text>
                 </View>
@@ -167,7 +167,7 @@ class SortCell extends Component {
 }
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 1
     },
     tips: {
         fontSize: 29
@@ -183,13 +183,12 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     image: {
-        tintColor: '#2196F3',
         width: 16,
         height: 16,
         marginRight: 10
     },
     save:{
         fontSize:20,
-        color:'#FFFFFF',
-    },
+        color:'#FFFFFF'
+    }
 });

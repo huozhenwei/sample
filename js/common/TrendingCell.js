@@ -43,7 +43,7 @@ export default class TrendingCell extends Component {
         let favouriteButton = this.props.projectModel.item ?
         <TouchableOpacity onPress={()=>this.onPressFavourite()}>
             <Image style={{padding:6}}
-                style={[{width: 22,height: 22},{tintColor:'#2196F3'}]}
+                style={[{width: 22,height: 22},this.props.theme.styles.tabBarSelectedIcon]}
                 source={this.state.favouriteIcon}/>
         </TouchableOpacity>:null;
         let description = '<p>'+ item.description +'</p>';
