@@ -1,6 +1,7 @@
 package com.sample;
 
 import com.facebook.react.ReactActivity;
+import com.umeng.analytics.MobclickAgent;
 
 public class MainActivity extends ReactActivity {
 
@@ -12,4 +13,17 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "sample";
     }
+
+    /**
+     * 友盟统计集成
+     */
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
 }
