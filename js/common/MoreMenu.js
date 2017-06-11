@@ -18,6 +18,8 @@ import SortKeyPage from '../pages/my/SortKeyPage';
 import {FLAG_LANGUAGE} from '../expand/dao/LanguageDao';
 import AboutMePage from '../pages/about/AboutMePage';
 import AboutPage from '../pages/about/AboutPage';
+import UShare from './UShare';
+import share from '../../res/data/share.json'
 /**
  * 更多菜单
  */
@@ -124,6 +126,9 @@ export default class MoreMenu extends Component {
                 }).catch(err => console.error('An error occurred', err));
                 break;
             case MORE_MENU.Share:
+                var shareApp=share.share_app;
+                UShare.share(shareApp.title, shareApp.content,
+                    shareApp.imgUrl,shareApp.url,()=>{},()=>{})
                 break;
         }
         if(TargetComponent){
