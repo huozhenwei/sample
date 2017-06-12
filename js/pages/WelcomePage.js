@@ -15,6 +15,7 @@ import {
 import NavigationBar from '../common/NavigationBar';
 import HomePage from './HomePage';
 import ThemeDao from '../expand/dao/ThemeDao';
+import SplashScreen from 'react-native-splash-screen';
 export default class WelcomePage extends Component{
     constructor(props){
         super(props);
@@ -27,6 +28,7 @@ export default class WelcomePage extends Component{
                 this.theme = data;
             });
         this.timer = setTimeout(()=>{
+            SplashScreen.hide();//关闭启动屏幕
             /**
              * 用resetTo 而不用push?
              * 要在欢迎页重置页面栈中的路由, 然后让主页成为栈中的第一个组件,前面的组件就不在需要了.
@@ -46,13 +48,7 @@ export default class WelcomePage extends Component{
     }
 
     render(){
-        return (<View style={styles.container}>
-            <NavigationBar
-                title='欢迎'
-                style={{backgroundColor:'#2196F3'}}
-            />
-            <Text style={styles.tips}>欢迎</Text>
-        </View>)
+        return null;
     }
 }
 

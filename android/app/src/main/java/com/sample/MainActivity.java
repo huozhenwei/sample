@@ -3,6 +3,7 @@ package com.sample;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.cboy.rn.splashscreen.SplashScreen;
 import com.facebook.react.ReactActivity;
 import com.sample.u_share.UShare;
 import com.umeng.analytics.MobclickAgent;
@@ -32,6 +33,7 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen.show(this);  // 调用启动屏，要在super之前调用，因为要在bundle.js装载之前启动
         super.onCreate(savedInstanceState);
         UShare.init(this);
     }
