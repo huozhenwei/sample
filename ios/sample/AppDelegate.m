@@ -8,7 +8,7 @@
  */
 
 #import "AppDelegate.h"
-
+#import "UMMobClick/MobClick.h"
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 
@@ -16,6 +16,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  UMConfigInstance.appKey = @"593d2acfb27b0a270d0007b7";
+  UMConfigInstance.ChannelId = @"App Store";
+  [MobClick startWithConfigure:UMConfigInstance];//配置以上参数后调用此方法初始化SDK！
+
   NSURL *jsCodeLocation;
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
