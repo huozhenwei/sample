@@ -33,7 +33,8 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SplashScreen.show(this);  // 调用启动屏，要在super之前调用，因为要在bundle.js装载之前启动
+        // 调用启动屏，要在super之前调用，因为要在bundle.js装载之前启动; 第二个参数是全屏显示
+        SplashScreen.show(this,true);
         super.onCreate(savedInstanceState);
         UShare.init(this);
     }

@@ -20,6 +20,7 @@ import RepositoryCell from '../../common/RepositoryCell';
 import Utils from '../../util/Utils';
 import ActionUtils from '../../util/ActionUtils';
 import RepositoryUtils from '../../expand/dao/RepositoryUtils';
+import BackPressComponent from '../../common/BackPressComponent';
 export var FLAG_ABOUT = {flag_about:'about',flag_about_me:'about_me'};
 export default class AboutCommon{
 
@@ -32,9 +33,11 @@ export default class AboutCommon{
         this.favouriteDao = new FavouriteDao(FLAG_STORAGE.flag_my);
         this.config = config;
         this.repositoryUtils = new RepositoryUtils(this);
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
     }
 
     componentDidMount(){
+        this.backPress.componentDidMount();
         if(this.flag_about === FLAG_ABOUT.flag_about){
             this.repositoryUtils.fetchRepository(this.config.info.currentRepoUrl);
         }
@@ -46,6 +49,13 @@ export default class AboutCommon{
             }
             this.repositoryUtils.fetchRepositorys(urls);
         }
+    }
+    componentWillUnmount() {
+        this.backPress.componentWillUnmount();
+    }
+    onBackPress(e){
+        this.props.navigator.pop();
+        return true; //告诉系统当前页面已经处理了返回事件
     }
 
     /**

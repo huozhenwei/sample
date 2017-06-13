@@ -28,6 +28,7 @@ import ProjectModel from '../model/ProjectModel';
 import {ACTION_HOME} from './HomePage';
 import {FLAG_TAB} from './HomePage';
 import makeCancelable from '../util/Cancelable';
+import BackPressComponent from '../common/BackPressComponent';
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=stars';
 export default class SearchPage extends Component {
@@ -46,14 +47,16 @@ export default class SearchPage extends Component {
             dataSource: new ListView.DataSource({
                 rowHasChanged: (r1, r2) => r1 !== r2
             })
-        }
+        };
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
     }
 
     componentDidMount() {
         this.initKeys();
+        this.backPress.componentDidMount();
     }
-
     componentWillUnmount(){
+        this.backPress.componentWillUnmount();
         if(this.isKeyChange){
             //传入事件名,类型 和 默认tab
             DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,FLAG_TAB.flag_popularTab);
@@ -176,6 +179,7 @@ export default class SearchPage extends Component {
         //隐藏键盘
         this.refs.input.blur();
         this.props.navigator.pop();
+        return true; //告诉系统当前页面已经处理了返回事件
     }
     onRightButtonClick(){
         if(this.state.rightButtonText === '搜索'){

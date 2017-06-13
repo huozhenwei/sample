@@ -18,6 +18,7 @@ import ViewUtil from '../../util/ViewUtil';
 import ArrayUtils from '../../util/ArrayUtils';
 import LanguageDao,{FLAG_LANGUAGE} from '../../expand/dao/LanguageDao';
 import {ACTION_HOME,FLAG_TAB} from '../../pages/HomePage';
+import BackPressComponent from '../../common/BackPressComponent';
 export default class CustomKeyPage extends Component{
     constructor(props){
         super(props);
@@ -27,7 +28,8 @@ export default class CustomKeyPage extends Component{
         this.changeValues = [];
         this.state={
             dataArray:[] //语言标签
-        }
+        };
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
     }
 
     //组件完成加载时候就调用
@@ -35,6 +37,14 @@ export default class CustomKeyPage extends Component{
         //初始化LanguageDao
         this.languageDao = new LanguageDao(this.props.flag);
         this.loadData();
+        this.backPress.componentDidMount();
+    }
+    onBackPress(e){
+        this.onBack();
+        return true; //告诉系统当前页面已经处理了返回事件
+    }
+    componentWillUnmount() {
+        this.backPress.componentWillUnmount();
     }
 
     //从 LanguageDao 加载标签

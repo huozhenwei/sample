@@ -12,9 +12,10 @@ import {
     Image,
     TouchableOpacity,
 } from 'react-native';
-import NavigationBar from '../../js/common/NavigationBar';
+import NavigationBar from '../common/NavigationBar';
 import ViewUtil from '../util/ViewUtil';
 import FavouriteDao from '../expand/dao/FavouriteDao';
+import BackPressComponent from '../common/BackPressComponent';
 
 const TRENDING_URL = 'https://github.com/';
 export default class RepositoryDetail extends Component{
@@ -33,9 +34,18 @@ export default class RepositoryDetail extends Component{
             favouriteIcon:this.props.projectModel.isFavourite?
                 require('../../res/images/ic_star.png'):
                 require('../../res/images/ic_star_navbar.png')
-        }
+        };
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
     }
 
+    componentDidMount(){
+        //让BackPressComponent组件注册监听
+        this.backPress.componentDidMount();
+    }
+    onBackPress(e){
+        this.onBack();
+        return true; //告诉系统当前页面已经处理了返回事件
+    }
     onBack(){
         //先判断,能返回就返回,不能就关闭
         if(this.state.canGoBack){
@@ -55,8 +65,10 @@ export default class RepositoryDetail extends Component{
     }
 
     componentWillUnmount() {
+        this.backPress.componentWillUnmount();
         if (this.props.onUpdateFavourite)this.props.onUpdateFavourite();
     }
+
     setFavoriteState(isFavourite) {
         this.setState({
             isFavourite: isFavourite,
