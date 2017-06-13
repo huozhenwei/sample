@@ -26,6 +26,7 @@ export default class NavigationBar extends Component{
         style: View.propTypes.style,  //允许用户自定义样式
         title: PropTypes.string,   //允许用户自定义标题
         titleView: PropTypes.element,   //有些页面title位置是下拉框,不仅仅是文字
+        titleLayoutStyle:View.propTypes.style, //title文字过长,添加样式
         hide:PropTypes.bool, //是否可以隐藏
         leftButton: PropTypes.element,  //左侧按钮元素
         rightButton: PropTypes.element, //右侧按钮元素
@@ -63,11 +64,12 @@ export default class NavigationBar extends Component{
         </View>;
 
         let titleView = this.props.titleView ? this.props.titleView :
-            <Text style={styles.title}>{this.props.title}</Text>;
+            <Text ellipsizeMode="head" numberOfLines={1}
+                  style={styles.title}>{this.props.title}</Text>;
 
         let content = <View style={styles.navBar}>
             {this.getButtonElement(this.props.leftButton)}
-            <View style={styles.titleViewContainer}>
+            <View style={[styles.titleViewContainer,this.props.titleLayoutStyle]}>
                 {titleView}
             </View>
             {this.getButtonElement(this.props.rightButton)}

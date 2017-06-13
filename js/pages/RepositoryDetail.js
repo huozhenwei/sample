@@ -98,11 +98,13 @@ export default class RepositoryDetail extends Component{
         </TouchableOpacity>;
     }
     render(){
+        let titleLayoutStyle = this.state.title.length>20?{paddingRight:5}:null;
         return (
             <View style={styles.container}>
                 <NavigationBar
                     title={this.state.title}
                     style={this.props.theme.styles.navBar}
+                    titleLayoutStyle={titleLayoutStyle}
                     leftButton={ViewUtil.getLeftButton(()=>this.onBack())}
                     rightButton={this.renderRightButton()}
                 />
